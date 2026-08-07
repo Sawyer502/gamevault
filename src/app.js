@@ -1,88 +1,34 @@
-/* =========================================================
-   GAMEVAULT
-   Main application
-========================================================= */
-
-
-/* =========================================================
-   STATE
-========================================================= */
-
 let games = [];
-
 let filteredGames = [];
-
 let currentGame = null;
-
 let currentCategory = "all";
 
 
-/* =========================================================
-   ELEMENTS
-========================================================= */
-
 const elements = {
+    gamesGrid: document.getElementById("gamesGrid"),
+    gameSearch: document.getElementById("gameSearch"),
+    gameCount: document.getElementById("gameCount"),
+    heroGameCount: document.getElementById("heroGameCount"),
+    loadingState: document.getElementById("loadingState"),
+    emptyState: document.getElementById("emptyState"),
+    clearSearchButton: document.getElementById("clearSearchButton"),
 
-    gamesGrid:
-        document.getElementById("gamesGrid"),
+    gamePlayer: document.getElementById("gamePlayer"),
+    gameFrame: document.getElementById("gameFrame"),
+    playerTitle: document.getElementById("playerTitle"),
+    playerGameIcon: document.getElementById("playerGameIcon"),
 
-    gameSearch:
-        document.getElementById("gameSearch"),
+    browseButton: document.getElementById("browseButton"),
+    luckyButton: document.getElementById("luckyButton"),
+    randomGameButton: document.getElementById("randomGameButton"),
 
-    gameCount:
-        document.getElementById("gameCount"),
+    closeGameButton: document.getElementById("closeGameButton"),
+    fullscreenButton: document.getElementById("fullscreenButton"),
+    reloadGameButton: document.getElementById("reloadGameButton"),
 
-    heroGameCount:
-        document.getElementById("heroGameCount"),
-
-    loadingState:
-        document.getElementById("loadingState"),
-
-    emptyState:
-        document.getElementById("emptyState"),
-
-    clearSearchButton:
-        document.getElementById("clearSearchButton"),
-
-    gamePlayer:
-        document.getElementById("gamePlayer"),
-
-    gameFrame:
-        document.getElementById("gameFrame"),
-
-    playerTitle:
-        document.getElementById("playerTitle"),
-
-    playerGameIcon:
-        document.getElementById("playerGameIcon"),
-
-    browseButton:
-        document.getElementById("browseButton"),
-
-    luckyButton:
-        document.getElementById("luckyButton"),
-
-    randomGameButton:
-        document.getElementById("randomGameButton"),
-
-    closeGameButton:
-        document.getElementById("closeGameButton"),
-
-    fullscreenButton:
-        document.getElementById("fullscreenButton"),
-
-    reloadGameButton:
-        document.getElementById("reloadGameButton"),
-
-    themeButton:
-        document.getElementById("themeButton")
-
+    themeButton: document.getElementById("themeButton")
 };
 
-
-/* =========================================================
-   INITIALIZATION
-========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -98,11 +44,12 @@ async function initialize() {
 
     await loadGames();
 
+    openGameFromHash();
 }
 
 
 /* =========================================================
-   LOAD GAMES
+   GAME LOADING
 ========================================================= */
 
 async function loadGames() {
@@ -111,54 +58,39 @@ async function loadGames() {
 
     try {
 
-        const response =
-            await fetch(
-                "games.json",
-                {
-                    cache: "no-store"
-                }
-            );
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Could not load games.json"
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        if (!Array.isArray(data)) {
-
-            throw new Error(
-                "games.json is not an array"
-            );
-
-        }
-
-
-        games = data.map(
-            normalizeGame
+        const response = await fetch(
+            "../games.json",
+            {
+                cache: "no-store"
+            }
         );
 
+        if (!response.ok) {
+            throw new Error(
+                "games.json could not be loaded."
+            );
+        }
 
-        filteredGames =
-            [...games];
+        const data = await response.json();
 
+        if (!Array.isArray(data)) {
+            throw new Error(
+                "games.json must contain an array."
+            );
+        }
+
+        games = data.map(normalizeGame);
+
+        filteredGames = [...games];
 
         updateGameCounts();
 
         renderGames();
 
-
     } catch (error) {
 
         console.error(
-            "GameVault:",
+            "GameVault error:",
             error
         );
 
@@ -173,7 +105,6 @@ async function loadGames() {
         showLoading(false);
 
     }
-
 }
 
 
@@ -183,18 +114,15 @@ async function loadGames() {
 
 function normalizeGame(game) {
 
-    const id =
-        String(
-            game.id ||
-            game.title ||
-            "game"
-        );
-
+    const id = String(
+        game.id ||
+        game.title ||
+        "game"
+    );
 
     const title =
         game.title ||
         prettifyName(id);
-
 
     return {
 
@@ -203,85 +131,72 @@ function normalizeGame(game) {
         title,
 
         file:
-            game.file ||
-            `games/${id}.html`,
+            game.file
+                ? `../${game.file}`
+                : `../games/${id}.html`,
 
         image:
-            game.image ||
-            null,
+            game.image
+                ? `../${game.image}`
+                : null,
 
         category:
             game.category ||
             "all",
 
         featured:
-            Boolean(
-                game.featured
-            ),
+            Boolean(game.featured),
 
         created:
             game.created ||
             null
-
     };
-
 }
 
 
 /* =========================================================
-   PRETTY GAME NAME
+   NAME FORMATTING
 ========================================================= */
 
 function prettifyName(name) {
 
-    return name
-
+    return String(name)
         .replace(
             /\.html$/i,
             ""
         )
-
         .replace(
             /[-_]+/g,
             " "
         )
-
         .replace(
             /([a-z])([A-Z])/g,
             "$1 $2"
         )
-
         .replace(
             /\s+/g,
             " "
         )
-
         .trim()
-
         .replace(
             /\b\w/g,
             character =>
                 character.toUpperCase()
         );
-
 }
 
 
 /* =========================================================
-   RENDER GAMES
+   RENDER
 ========================================================= */
 
 function renderGames() {
 
     elements.gamesGrid.innerHTML = "";
 
+    if (!filteredGames.length) {
 
-    if (
-        filteredGames.length === 0
-    ) {
-
-        elements.emptyState.hidden =
-            false;
+        elements.emptyState.hidden = false;
 
         elements.gamesGrid.style.display =
             "none";
@@ -289,12 +204,9 @@ function renderGames() {
         updateGameCount();
 
         return;
-
     }
 
-
-    elements.emptyState.hidden =
-        true;
+    elements.emptyState.hidden = true;
 
     elements.gamesGrid.style.display =
         "grid";
@@ -309,60 +221,39 @@ function renderGames() {
                     index
                 );
 
-
             elements.gamesGrid.appendChild(
                 card
             );
-
         }
     );
 
 
     updateGameCount();
-
 }
 
 
 /* =========================================================
-   CREATE GAME CARD
+   GAME CARD
 ========================================================= */
 
-function createGameCard(
-    game,
-    index
-) {
+function createGameCard(game, index) {
 
     const card =
-        document.createElement(
-            "article"
-        );
+        document.createElement("article");
 
-
-    card.className =
-        "game-card";
-
+    card.className = "game-card";
 
     card.tabIndex = 0;
-
 
     card.style.animationDelay =
         `${Math.min(index * 35, 350)}ms`;
 
 
-    const imageHTML =
-        createGameImage(
-            game
-        );
-
-
     card.innerHTML = `
 
         <div class="game-image">
-
-            ${imageHTML}
-
+            ${createGameImage(game)}
         </div>
-
 
         <div class="game-info">
 
@@ -376,22 +267,20 @@ function createGameCard(
                 </div>
 
                 <div class="game-meta">
-                    ${getGameMeta(game)}
+                    ${escapeHTML(getGameMeta(game))}
                 </div>
 
             </div>
 
-
             <button
                 class="play-button"
                 type="button"
-                aria-label="Play ${escapeHTML(game.title)}"
+                aria-label="Play ${escapeAttribute(game.title)}"
             >
                 ▶
             </button>
 
         </div>
-
     `;
 
 
@@ -413,20 +302,17 @@ function createGameCard(
                 event.preventDefault();
 
                 openGame(game);
-
             }
-
         }
     );
 
 
     return card;
-
 }
 
 
 /* =========================================================
-   GAME IMAGE
+   IMAGE
 ========================================================= */
 
 function createGameImage(game) {
@@ -434,59 +320,44 @@ function createGameImage(game) {
     if (!game.image) {
 
         return `
-
-            <div
-                class="game-placeholder"
-                aria-label="No game image"
-            >
+            <div class="game-placeholder">
                 ✦
             </div>
-
         `;
-
     }
 
 
     return `
-
         <img
             src="${escapeAttribute(game.image)}"
             alt="${escapeAttribute(game.title)}"
             loading="lazy"
-            onerror="this.parentElement.innerHTML =
-                '<div class=&quot;game-placeholder&quot;>✦</div>'"
+            onerror="this.onerror=null;this.parentElement.innerHTML='<div class=&quot;game-placeholder&quot;>✦</div>'"
         >
-
     `;
-
 }
 
 
 /* =========================================================
-   GAME META
+   META
 ========================================================= */
 
 function getGameMeta(game) {
 
     if (game.featured) {
-
         return "Featured";
-
     }
 
-
-    if (game.category &&
-        game.category !== "all") {
-
+    if (
+        game.category &&
+        game.category !== "all"
+    ) {
         return prettifyName(
             game.category
         );
-
     }
 
-
     return "Play now";
-
 }
 
 
@@ -503,36 +374,30 @@ function searchGames(query) {
 
 
     filteredGames =
-        games.filter(
-            game => {
+        games.filter(game => {
 
-                const matchesSearch =
-                    !normalized ||
-                    game.title
-                        .toLowerCase()
-                        .includes(normalized) ||
-                    game.id
-                        .toLowerCase()
-                        .includes(normalized);
-
-
-                const matchesCategory =
-                    matchesCurrentCategory(
-                        game
-                    );
+            const matchesSearch =
+                !normalized ||
+                game.title
+                    .toLowerCase()
+                    .includes(normalized) ||
+                game.id
+                    .toLowerCase()
+                    .includes(normalized);
 
 
-                return (
-                    matchesSearch &&
-                    matchesCategory
-                );
+            const matchesCategory =
+                matchesCurrentCategory(game);
 
-            }
-        );
+
+            return (
+                matchesSearch &&
+                matchesCategory
+            );
+        });
 
 
     renderGames();
-
 }
 
 
@@ -545,20 +410,16 @@ function matchesCurrentCategory(game) {
     if (
         currentCategory === "all"
     ) {
-
         return true;
-
     }
 
 
     if (
         currentCategory === "featured"
     ) {
-
         return Boolean(
             game.featured
         );
-
     }
 
 
@@ -566,8 +427,21 @@ function matchesCurrentCategory(game) {
         currentCategory === "new"
     ) {
 
-        return true;
+        if (!game.created) {
+            return false;
+        }
 
+        const created =
+            new Date(game.created);
+
+        const sevenDaysAgo =
+            Date.now() -
+            7 * 24 * 60 * 60 * 1000;
+
+        return (
+            created.getTime() >=
+            sevenDaysAgo
+        );
     }
 
 
@@ -575,7 +449,6 @@ function matchesCurrentCategory(game) {
         game.category ===
         currentCategory
     );
-
 }
 
 
@@ -586,9 +459,7 @@ function matchesCurrentCategory(game) {
 function openGame(game) {
 
     if (!game || !game.file) {
-
         return;
-
     }
 
 
@@ -623,19 +494,82 @@ function openGame(game) {
     );
 
 
-    window.history.pushState(
+    history.pushState(
         {
             game: game.id
         },
         "",
         `#play=${encodeURIComponent(game.id)}`
     );
-
 }
 
 
 /* =========================================================
-   CLOSE GAME
+   OPEN FROM URL
+========================================================= */
+
+function openGameFromHash() {
+
+    const hash =
+        window.location.hash;
+
+
+    if (
+        !hash.startsWith("#play=")
+    ) {
+        return;
+    }
+
+
+    const id =
+        decodeURIComponent(
+            hash.substring(6)
+        );
+
+
+    const game =
+        games.find(
+            item =>
+                item.id === id
+        );
+
+
+    if (game) {
+        openGameWithoutHistory(game);
+    }
+}
+
+
+function openGameWithoutHistory(game) {
+
+    currentGame = game;
+
+    elements.playerTitle.textContent =
+        game.title;
+
+    elements.playerGameIcon.textContent =
+        getInitial(game.title);
+
+    elements.gameFrame.src =
+        game.file;
+
+    elements.gamePlayer.classList.add(
+        "open"
+    );
+
+    elements.gamePlayer.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+    document.body.classList.add(
+        "player-open"
+    );
+}
+
+
+/* =========================================================
+   CLOSE
 ========================================================= */
 
 function closeGame(
@@ -676,28 +610,22 @@ function closeGame(
             window.location.pathname +
             window.location.search
         );
-
     }
-
 }
 
 
 /* =========================================================
-   RELOAD GAME
+   RELOAD
 ========================================================= */
 
 function reloadGame() {
 
     if (!currentGame) {
-
         return;
-
     }
-
 
     elements.gameFrame.src =
         currentGame.file;
-
 }
 
 
@@ -716,7 +644,6 @@ async function fullscreenGame() {
             await document.exitFullscreen();
 
             return;
-
         }
 
 
@@ -727,7 +654,6 @@ async function fullscreenGame() {
             await elements.gameFrame.requestFullscreen();
 
             return;
-
         }
 
 
@@ -736,7 +662,6 @@ async function fullscreenGame() {
         ) {
 
             await elements.gamePlayer.requestFullscreen();
-
         }
 
     } catch (error) {
@@ -745,9 +670,7 @@ async function fullscreenGame() {
             "Fullscreen unavailable:",
             error
         );
-
     }
-
 }
 
 
@@ -758,13 +681,11 @@ async function fullscreenGame() {
 function openRandomGame() {
 
     if (!games.length) {
-
         return;
-
     }
 
 
-    const randomIndex =
+    const index =
         Math.floor(
             Math.random() *
             games.length
@@ -772,21 +693,19 @@ function openRandomGame() {
 
 
     openGame(
-        games[randomIndex]
+        games[index]
     );
-
 }
 
 
 /* =========================================================
-   COUNTS
+   COUNTERS
 ========================================================= */
 
 function updateGameCounts() {
 
     elements.heroGameCount.textContent =
         games.length;
-
 }
 
 
@@ -802,7 +721,6 @@ function updateGameCount() {
                 ? "game"
                 : "games"
         }`;
-
 }
 
 
@@ -814,7 +732,6 @@ function showLoading(show) {
 
     elements.loadingState.hidden =
         !show;
-
 }
 
 
@@ -824,15 +741,13 @@ function showLoading(show) {
 
 function loadTheme() {
 
-    const savedTheme =
+    const theme =
         localStorage.getItem(
             "gamevault-theme"
         );
 
 
-    if (
-        savedTheme === "light"
-    ) {
+    if (theme === "light") {
 
         document.body.classList.add(
             "light"
@@ -840,15 +755,13 @@ function loadTheme() {
 
         elements.themeButton.textContent =
             "☾";
-
     }
-
 }
 
 
 function toggleTheme() {
 
-    const isLight =
+    const light =
         document.body.classList.toggle(
             "light"
         );
@@ -856,17 +769,16 @@ function toggleTheme() {
 
     localStorage.setItem(
         "gamevault-theme",
-        isLight
+        light
             ? "light"
             : "dark"
     );
 
 
     elements.themeButton.textContent =
-        isLight
+        light
             ? "☾"
             : "☼";
-
 }
 
 
@@ -876,9 +788,6 @@ function toggleTheme() {
 
 function setupEvents() {
 
-
-    /* SEARCH */
-
     elements.gameSearch.addEventListener(
         "input",
         event => {
@@ -886,29 +795,22 @@ function setupEvents() {
             searchGames(
                 event.target.value
             );
-
         }
     );
 
-
-    /* CLEAR SEARCH */
 
     elements.clearSearchButton.addEventListener(
         "click",
         () => {
 
-            elements.gameSearch.value =
-                "";
+            elements.gameSearch.value = "";
 
             searchGames("");
 
             elements.gameSearch.focus();
-
         }
     );
 
-
-    /* BROWSE */
 
     elements.browseButton.addEventListener(
         "click",
@@ -919,12 +821,9 @@ function setupEvents() {
                 .scrollIntoView({
                     behavior: "smooth"
                 });
-
         }
     );
 
-
-    /* LUCKY */
 
     elements.luckyButton.addEventListener(
         "click",
@@ -932,15 +831,11 @@ function setupEvents() {
     );
 
 
-    /* NAV RANDOM */
-
     elements.randomGameButton.addEventListener(
         "click",
         openRandomGame
     );
 
-
-    /* CLOSE */
 
     elements.closeGameButton.addEventListener(
         "click",
@@ -948,15 +843,11 @@ function setupEvents() {
     );
 
 
-    /* RELOAD */
-
     elements.reloadGameButton.addEventListener(
         "click",
         reloadGame
     );
 
-
-    /* FULLSCREEN */
 
     elements.fullscreenButton.addEventListener(
         "click",
@@ -964,15 +855,11 @@ function setupEvents() {
     );
 
 
-    /* THEME */
-
     elements.themeButton.addEventListener(
         "click",
         toggleTheme
     );
 
-
-    /* CATEGORY */
 
     document
         .querySelectorAll(
@@ -1008,14 +895,10 @@ function setupEvents() {
                     searchGames(
                         elements.gameSearch.value
                     );
-
                 }
             );
-
         });
 
-
-    /* ESCAPE */
 
     document.addEventListener(
         "keydown",
@@ -1030,30 +913,23 @@ function setupEvents() {
 
                 closeGame();
 
+                return;
             }
 
 
-            /* "/" focuses search */
-
             if (
                 event.key === "/" &&
-                document.activeElement.tagName !==
-                    "INPUT" &&
-                document.activeElement.tagName !==
-                    "TEXTAREA"
+                document.activeElement.tagName !== "INPUT" &&
+                document.activeElement.tagName !== "TEXTAREA"
             ) {
 
                 event.preventDefault();
 
                 elements.gameSearch.focus();
-
             }
-
         }
     );
 
-
-    /* BACK BUTTON */
 
     window.addEventListener(
         "popstate",
@@ -1066,12 +942,9 @@ function setupEvents() {
             ) {
 
                 closeGame(false);
-
             }
-
         }
     );
-
 }
 
 
@@ -1088,7 +961,6 @@ function getInitial(text) {
             .toUpperCase() ||
         "G"
     );
-
 }
 
 
@@ -1107,12 +979,10 @@ function escapeHTML(value) {
 
             })[character]
         );
-
 }
 
 
 function escapeAttribute(value) {
 
     return escapeHTML(value);
-
 }
