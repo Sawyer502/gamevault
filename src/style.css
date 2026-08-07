@@ -241,6 +241,14 @@ a {
 }
 
 
+.brand-icon img {
+    width: 75%;
+    height: 75%;
+    object-fit: contain;
+    display: block;
+}
+
+
 .brand-text {
     display: flex;
     flex-direction: column;
