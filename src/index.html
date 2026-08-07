@@ -10,54 +10,43 @@
 
     <meta
         name="description"
-        content="GameVault — your personal collection of games."
+        content="GameVault — your personal gaming arcade."
     >
 
     <meta
         name="theme-color"
-        content="#08090d"
+        content="#07080c"
     >
 
-    <title>GameVault — Play Anything</title>
+    <title>GameVault</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- =====================================================
-         BACKGROUND
-    ====================================================== -->
+    <!-- BACKGROUND -->
 
     <div class="background-effects" aria-hidden="true">
-
         <div class="ambient-glow glow-purple"></div>
         <div class="ambient-glow glow-green"></div>
         <div class="ambient-glow glow-blue"></div>
 
         <div class="noise"></div>
-
         <div class="background-grid"></div>
-
     </div>
 
 
-    <!-- =====================================================
-         NAVIGATION
-    ====================================================== -->
+    <!-- NAVIGATION -->
 
     <header class="navbar">
 
         <div class="navbar-inner">
 
-            <a
-                href="#"
-                class="brand"
-                aria-label="GameVault home"
-            >
+            <a href="/" class="brand">
 
                 <div class="brand-icon">
-                    <span>G</span>
+                    G
                 </div>
 
                 <div class="brand-text">
@@ -70,11 +59,17 @@
 
             <nav class="desktop-nav">
 
-                <a href="#games" class="nav-link active">
+                <a
+                    href="#games"
+                    class="nav-link active"
+                >
                     Games
                 </a>
 
-                <a href="#about" class="nav-link">
+                <a
+                    href="#about"
+                    class="nav-link"
+                >
                     About
                 </a>
 
@@ -89,16 +84,18 @@
                     type="button"
                     title="Play a random game"
                 >
-                    <span class="nav-action-icon">↗</span>
-                    <span class="nav-action-label">Random</span>
+                    <span class="nav-action-icon">✦</span>
+                    <span class="nav-action-label">
+                        Random
+                    </span>
                 </button>
 
                 <button
                     class="nav-action icon-only"
                     id="themeButton"
                     type="button"
-                    title="Toggle appearance"
-                    aria-label="Toggle appearance"
+                    title="Toggle theme"
+                    aria-label="Toggle theme"
                 >
                     ☼
                 </button>
@@ -110,35 +107,31 @@
     </header>
 
 
-    <!-- =====================================================
-         MAIN
-    ====================================================== -->
+    <!-- MAIN -->
 
     <main>
 
 
-        <!-- =================================================
-             HERO
-        ================================================== -->
+        <!-- HERO -->
 
         <section class="hero">
 
             <div class="hero-content">
 
                 <div class="hero-eyebrow">
-
                     <span class="live-dot"></span>
 
                     <span>
                         YOUR PERSONAL ARCADE
                     </span>
-
                 </div>
 
 
                 <h1 class="hero-title">
 
-                    <span>Play something</span>
+                    <span>
+                        Play something
+                    </span>
 
                     <span class="hero-title-accent">
                         awesome.
@@ -148,10 +141,8 @@
 
 
                 <p class="hero-description">
-
                     Your favorite games, all in one place.
                     Pick something you like, sit back, and play.
-
                 </p>
 
 
@@ -162,13 +153,13 @@
                         id="browseButton"
                         type="button"
                     >
-
-                        <span>Browse Games</span>
+                        <span>
+                            Browse Games
+                        </span>
 
                         <span class="button-arrow">
                             ↓
                         </span>
-
                     </button>
 
 
@@ -177,11 +168,11 @@
                         id="luckyButton"
                         type="button"
                     >
-
-                        <span class="dice-icon">✦</span>
+                        <span class="dice-icon">
+                            ✦
+                        </span>
 
                         I'm Feeling Lucky
-
                     </button>
 
                 </div>
@@ -238,16 +229,12 @@
             </div>
 
 
-            <!-- =================================================
-                 HERO VISUAL
-            ================================================== -->
+            <!-- HERO VISUAL -->
 
             <div class="hero-visual">
 
                 <div class="hero-orbit orbit-horizontal"></div>
-
                 <div class="hero-orbit orbit-vertical"></div>
-
 
                 <div class="floating-particle particle-one"></div>
                 <div class="floating-particle particle-two"></div>
@@ -255,8 +242,6 @@
 
 
                 <div class="featured-card">
-
-                    <div class="featured-card-shine"></div>
 
                     <div class="featured-card-top">
 
@@ -275,26 +260,24 @@
 
                         <div class="symbol-ring"></div>
 
-                        <span>✦</span>
+                        <span>
+                            ✦
+                        </span>
 
                     </div>
 
 
                     <div class="featured-card-bottom">
 
-                        <div>
+                        <span class="featured-small">
+                            READY TO PLAY
+                        </span>
 
-                            <span class="featured-small">
-                                READY TO PLAY
-                            </span>
-
-                            <h2>
-                                Your arcade.
-                                <br>
-                                One click away.
-                            </h2>
-
-                        </div>
+                        <h2>
+                            Your arcade.
+                            <br>
+                            One click away.
+                        </h2>
 
                         <div class="featured-line"></div>
 
@@ -307,9 +290,7 @@
         </section>
 
 
-        <!-- =================================================
-             GAME LIBRARY
-        ================================================== -->
+        <!-- GAMES -->
 
         <section
             class="games-section"
@@ -376,8 +357,6 @@
             </div>
 
 
-            <!-- CATEGORY BAR -->
-
             <div class="category-bar">
 
                 <button
@@ -407,8 +386,6 @@
             </div>
 
 
-            <!-- GAME GRID -->
-
             <div
                 class="games-grid"
                 id="gamesGrid"
@@ -416,23 +393,17 @@
             ></div>
 
 
-            <!-- LOADING -->
-
             <div
                 class="loading-state"
                 id="loadingState"
             >
-
                 <div class="loading-spinner"></div>
 
                 <span>
                     Loading games...
                 </span>
-
             </div>
 
-
-            <!-- EMPTY -->
 
             <div
                 class="empty-state"
@@ -441,7 +412,7 @@
             >
 
                 <div class="empty-icon">
-                    ⌕
+                    ✦
                 </div>
 
                 <h3>
@@ -465,9 +436,7 @@
         </section>
 
 
-        <!-- =================================================
-             ABOUT
-        ================================================== -->
+        <!-- ABOUT -->
 
         <section
             class="about-section"
@@ -515,9 +484,7 @@
     </main>
 
 
-    <!-- =====================================================
-         GAME PLAYER
-    ====================================================== -->
+    <!-- GAME PLAYER -->
 
     <div
         class="game-player"
@@ -566,9 +533,12 @@
                     class="player-control"
                     id="fullscreenButton"
                     type="button"
+                    title="Fullscreen"
                 >
                     ⛶
-                    <span>Fullscreen</span>
+                    <span>
+                        Fullscreen
+                    </span>
                 </button>
 
                 <button
@@ -577,7 +547,9 @@
                     type="button"
                 >
                     ✕
-                    <span>Close</span>
+                    <span>
+                        Close
+                    </span>
                 </button>
 
             </div>
@@ -599,9 +571,7 @@
     </div>
 
 
-    <!-- =====================================================
-         FOOTER
-    ====================================================== -->
+    <!-- FOOTER -->
 
     <footer>
 
@@ -633,8 +603,6 @@
 
     </footer>
 
-
-    <!-- JAVASCRIPT -->
 
     <script src="app.js"></script>
 
