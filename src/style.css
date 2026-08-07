@@ -1442,6 +1442,11 @@ main {
 }
 
 
+.loading-state[hidden] {
+    display: none !important;
+}
+
+
 .loading-spinner {
     width: 29px;
     height: 29px;
