@@ -1488,6 +1488,11 @@ main {
 }
 
 
+.empty-state[hidden] {
+    display: none !important;
+}
+
+
 .empty-icon {
     color: var(--accent);
 
