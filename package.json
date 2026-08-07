@@ -1,0 +1,9 @@
+{
+  "name": "gamevault",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GameVault gaming arcade",
+  "scripts": {
+    "build": "node scripts/generate-games.js"
+  }
+}
