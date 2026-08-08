@@ -1,0 +1,37 @@
+[
+  {
+    "id": "gladihoppers",
+    "title": "Gladihoppers",
+    "file": "games/gladihoppers.html",
+    "image": "",
+    "hoverImages": [],
+    "category": "all",
+    "featured": false,
+    "created": "2026-08-08"
+  },
+  {
+    "id": "konkr-io",
+    "title": "Konkr.io",
+    "file": "games/konkr io.html",
+    "image": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9tol.webp",
+    "hoverImages": [
+      "https://images.igdb.com/igdb/image/upload/t_720p/scwucn.webp",
+      "https://images.igdb.com/igdb/image/upload/t_720p/scwuco.webp",
+      "https://images.igdb.com/igdb/image/upload/t_720p/scwucp.webp",
+      "https://images.igdb.com/igdb/image/upload/t_720p/scwucq.webp"
+    ],
+    "category": "all",
+    "featured": false,
+    "created": "2026-08-08"
+  },
+  {
+    "id": "rocketgoal-io",
+    "title": "Rocketgoal Io",
+    "file": "games/rocketgoal io.html",
+    "image": "",
+    "hoverImages": [],
+    "category": "all",
+    "featured": false,
+    "created": "2026-08-08"
+  }
+]
