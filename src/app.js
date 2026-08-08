@@ -1,8 +1,8 @@
-```javascript
 let games = [];
 let filteredGames = [];
 let currentGame = null;
 let currentCategory = "all";
+
 
 const elements = {
     gamesGrid: document.getElementById("gamesGrid"),
@@ -29,33 +29,45 @@ const elements = {
     themeButton: document.getElementById("themeButton")
 };
 
-document.addEventListener("DOMContentLoaded", initialize);
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initialize
+);
+
 
 async function initialize() {
+
+    setupEvents();
+
     loadTheme();
 
     await loadGames();
 
-    setupEvents();
-
     openGameFromHash();
 }
+
 
 /* =========================================================
    GAME LOADING
 ========================================================= */
 
 async function loadGames() {
+
     showLoading(true);
 
     try {
-        const response = await fetch("/games.json", {
-            cache: "no-store"
-        });
+
+        const response = await fetch(
+            "../games.json",
+            {
+                cache: "no-store"
+            }
+        );
 
         if (!response.ok) {
             throw new Error(
-                `games.json could not be loaded. HTTP ${response.status}`
+                "games.json could not be loaded."
             );
         }
 
@@ -67,9 +79,7 @@ async function loadGames() {
             );
         }
 
-        games = data
-            .map(normalizeGame)
-            .filter(Boolean);
+        games = data.map(normalizeGame);
 
         filteredGames = [...games];
 
@@ -77,46 +87,48 @@ async function loadGames() {
 
         renderGames();
 
-        console.log(
-            `GameVault loaded ${games.length} game(s).`,
-            games
+    } catch (error) {
+
+        console.error(
+            "GameVault error:",
+            error
         );
 
-    } catch (error) {
-        console.error("GameVault error:", error);
-
         games = [];
+
         filteredGames = [];
 
-        updateGameCounts();
         renderGames();
 
     } finally {
+
         showLoading(false);
+
     }
 }
+
 
 /* =========================================================
    NORMALIZE GAME
 ========================================================= */
 
 function normalizeGame(game) {
-    if (!game || typeof game !== "object") {
-        return null;
-    }
-
     const id = String(
         game.id ||
         game.title ||
         "game"
-    ).trim();
+    );
 
     const title =
-        String(
-            game.title ||
-            prettifyName(id)
-        ).trim();
+        game.title ||
+        prettifyName(id);
 
+    /*
+     * Convert an image value into a usable URL.
+     *
+     * External URLs are kept exactly as provided.
+     * Existing local image paths still work.
+     */
     function normalizeImage(image) {
         if (!image) {
             return null;
@@ -129,8 +141,7 @@ function normalizeGame(game) {
         }
 
         /*
-         * External images:
-         * IGDB, HTTPS URLs, data URLs, etc.
+         * External image URL
          */
         if (
             value.startsWith("http://") ||
@@ -142,35 +153,30 @@ function normalizeGame(game) {
         }
 
         /*
-         * Local images are always loaded from
-         * the website root.
+         * Existing local image.
          */
         return value.startsWith("/")
             ? value
-            : `/${value}`;
+            : `../${value}`;
     }
 
+    /*
+     * Main image/logo.
+     */
     const image =
         normalizeImage(game.image);
 
+    /*
+     * Any number of hover images.
+     *
+     * 0, 1, 2, 4, 10, etc. are all supported.
+     */
     const hoverImages =
         Array.isArray(game.hoverImages)
             ? game.hoverImages
                 .map(normalizeImage)
                 .filter(Boolean)
             : [];
-
-    let file = game.file;
-
-    if (file) {
-        file = String(file).trim();
-
-        if (!file.startsWith("/")) {
-            file = `/${file}`;
-        }
-    } else {
-        file = `/games/${id}.html`;
-    }
 
     return {
         ...game,
@@ -179,7 +185,9 @@ function normalizeGame(game) {
 
         title,
 
-        file,
+        file:
+            game.file ||
+            `games/${id}.html`,
 
         image,
 
@@ -198,68 +206,91 @@ function normalizeGame(game) {
     };
 }
 
+
 /* =========================================================
    NAME FORMATTING
 ========================================================= */
 
 function prettifyName(name) {
+
     return String(name)
-        .replace(/\.html$/i, "")
-        .replace(/[-_]+/g, " ")
-        .replace(/([a-z])([A-Z])/g, "$1 $2")
-        .replace(/\s+/g, " ")
+        .replace(
+            /\.html$/i,
+            ""
+        )
+        .replace(
+            /[-_]+/g,
+            " "
+        )
+        .replace(
+            /([a-z])([A-Z])/g,
+            "$1 $2"
+        )
+        .replace(
+            /\s+/g,
+            " "
+        )
         .trim()
         .replace(
             /\b\w/g,
-            character => character.toUpperCase()
+            character =>
+                character.toUpperCase()
         );
 }
+
 
 /* =========================================================
    RENDER
 ========================================================= */
 
 function renderGames() {
-    if (!elements.gamesGrid) {
-        return;
-    }
 
     elements.gamesGrid.innerHTML = "";
 
     if (!filteredGames.length) {
-        if (elements.emptyState) {
-            elements.emptyState.hidden = false;
-        }
 
-        elements.gamesGrid.style.display = "none";
+        elements.emptyState.hidden = false;
+
+        elements.gamesGrid.style.display =
+            "none";
 
         updateGameCount();
 
         return;
     }
 
-    if (elements.emptyState) {
-        elements.emptyState.hidden = true;
-    }
+    elements.emptyState.hidden = true;
 
-    elements.gamesGrid.style.display = "grid";
+    elements.gamesGrid.style.display =
+        "grid";
 
-    filteredGames.forEach((game, index) => {
-        const card = createGameCard(game, index);
 
-        if (card) {
-            elements.gamesGrid.appendChild(card);
+    filteredGames.forEach(
+        (game, index) => {
+
+            const card =
+                createGameCard(
+                    game,
+                    index
+                );
+
+            elements.gamesGrid.appendChild(
+                card
+            );
         }
-    });
+    );
+
 
     updateGameCount();
 }
+
 
 /* =========================================================
    GAME CARD
 ========================================================= */
 
 function createGameCard(game, index) {
+
     const card =
         document.createElement("article");
 
@@ -270,7 +301,9 @@ function createGameCard(game, index) {
     card.style.animationDelay =
         `${Math.min(index * 35, 350)}ms`;
 
+
     card.innerHTML = `
+
         <div class="game-image">
             ${createGameImage(game)}
         </div>
@@ -281,15 +314,13 @@ function createGameCard(game, index) {
 
                 <div
                     class="game-name"
-                    title="${escapeAttribute(game.title)}"
+                    title="${escapeHTML(game.title)}"
                 >
                     ${escapeHTML(game.title)}
                 </div>
 
                 <div class="game-meta">
-                    ${escapeHTML(
-                        getGameMeta(game)
-                    )}
+                    ${escapeHTML(getGameMeta(game))}
                 </div>
 
             </div>
@@ -297,9 +328,7 @@ function createGameCard(game, index) {
             <button
                 class="play-button"
                 type="button"
-                aria-label="Play ${escapeAttribute(
-                    game.title
-                )}"
+                aria-label="Play ${escapeAttribute(game.title)}"
             >
                 ▶
             </button>
@@ -307,46 +336,33 @@ function createGameCard(game, index) {
         </div>
     `;
 
-    /*
-     * Clicking anywhere on the card launches
-     * the game.
-     */
-    card.addEventListener("click", event => {
-        /*
-         * Prevent the button click from causing
-         * duplicate handling.
-         */
-        if (
-            event.target.closest(".play-button")
-        ) {
-            openGame(game);
-            return;
+
+    card.addEventListener(
+        "click",
+        () => openGame(game)
+    );
+
+
+    card.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Enter" ||
+                event.key === " "
+            ) {
+
+                event.preventDefault();
+
+                openGame(game);
+            }
         }
+    );
 
-        openGame(game);
-    });
-
-    /*
-     * Image slideshow.
-     */
-    setupGameImageSlideshow(card);
-
-    /*
-     * Keyboard accessibility.
-     */
-    card.addEventListener("keydown", event => {
-        if (
-            event.key === "Enter" ||
-            event.key === " "
-        ) {
-            event.preventDefault();
-
-            openGame(game);
-        }
-    });
 
     return card;
 }
+
 
 /* =========================================================
    IMAGE
@@ -361,8 +377,7 @@ function createGameImage(game) {
     ].filter(Boolean);
 
     /*
-     * Games without artwork still get
-     * a proper placeholder.
+     * No images at all.
      */
     if (!images.length) {
         return `
@@ -372,32 +387,26 @@ function createGameImage(game) {
         `;
     }
 
+    /*
+     * Every image is placed in the same
+     * position. CSS handles the fading.
+     *
+     * The first image is the main logo/image.
+     */
     return images
-        .map(
-            (image, index) => `
-                <img
-                    class="${
-                        index === 0
-                            ? "active"
-                            : ""
-                    }"
-                    src="${escapeAttribute(image)}"
-                    alt="${escapeAttribute(game.title)}"
-                    loading="${
-                        index === 0
-                            ? "eager"
-                            : "lazy"
-                    }"
-                    data-image-index="${index}"
-                >
-            `
-        )
+        .map((image, index) => `
+            <img
+                class="${index === 0 ? "active" : ""}"
+                src="${escapeAttribute(image)}"
+                alt="${escapeAttribute(game.title)}"
+                loading="${index === 0 ? "eager" : "lazy"}"
+                data-image-index="${index}"
+                onerror="this.remove()"
+            >
+        `)
         .join("");
 }
 
-/* =========================================================
-   IMAGE SLIDESHOW
-========================================================= */
 
 function setupGameImageSlideshow(card) {
     const imageContainer =
@@ -413,8 +422,8 @@ function setupGameImageSlideshow(card) {
         );
 
     /*
-     * No slideshow needed if there is
-     * zero or one image.
+     * If there is only the main image,
+     * there is nothing to animate.
      */
     if (images.length <= 1) {
         return;
@@ -424,46 +433,53 @@ function setupGameImageSlideshow(card) {
     let slideshowTimer = null;
 
     function showImage(index) {
-        images.forEach(
-            (image, imageIndex) => {
-                image.classList.toggle(
-                    "active",
-                    imageIndex === index
-                );
-            }
-        );
+        images.forEach((image, imageIndex) => {
+            image.classList.toggle(
+                "active",
+                imageIndex === index
+            );
+        });
 
         currentIndex = index;
     }
 
     function startSlideshow() {
-        if (slideshowTimer !== null) {
+        /*
+         * Prevent multiple timers from
+         * being created.
+         */
+        if (slideshowTimer) {
             return;
         }
 
+        /*
+         * Always begin with the main image.
+         */
         showImage(0);
 
-        slideshowTimer =
-            window.setInterval(() => {
-                const nextIndex =
-                    (
-                        currentIndex + 1
-                    ) %
-                    images.length;
+        /*
+         * Move to the next image every
+         * 2.2 seconds.
+         */
+        slideshowTimer = setInterval(() => {
+            const nextIndex =
+                (currentIndex + 1) %
+                images.length;
 
-                showImage(nextIndex);
-            }, 2200);
+            showImage(nextIndex);
+        }, 2200);
     }
 
     function stopSlideshow() {
-        if (slideshowTimer !== null) {
-            window.clearInterval(
-                slideshowTimer
-            );
-
+        if (slideshowTimer) {
+            clearInterval(slideshowTimer);
             slideshowTimer = null;
         }
 
+        /*
+         * Always return to the main image
+         * when the mouse leaves.
+         */
         showImage(0);
     }
 
@@ -476,27 +492,15 @@ function setupGameImageSlideshow(card) {
         "mouseleave",
         stopSlideshow
     );
-
-    /*
-     * Also allow keyboard users to see
-     * the slideshow while focused.
-     */
-    card.addEventListener(
-        "focus",
-        startSlideshow
-    );
-
-    card.addEventListener(
-        "blur",
-        stopSlideshow
-    );
 }
+
 
 /* =========================================================
    META
 ========================================================= */
 
 function getGameMeta(game) {
+
     if (game.featured) {
         return "Featured";
     }
@@ -513,18 +517,22 @@ function getGameMeta(game) {
     return "Play now";
 }
 
+
 /* =========================================================
    SEARCH
 ========================================================= */
 
 function searchGames(query) {
+
     const normalized =
-        String(query || "")
+        query
             .trim()
             .toLowerCase();
 
+
     filteredGames =
         games.filter(game => {
+
             const matchesSearch =
                 !normalized ||
                 game.title
@@ -534,8 +542,10 @@ function searchGames(query) {
                     .toLowerCase()
                     .includes(normalized);
 
+
             const matchesCategory =
                 matchesCurrentCategory(game);
+
 
             return (
                 matchesSearch &&
@@ -543,23 +553,37 @@ function searchGames(query) {
             );
         });
 
+
     renderGames();
 }
+
 
 /* =========================================================
    CATEGORY
 ========================================================= */
 
 function matchesCurrentCategory(game) {
-    if (currentCategory === "all") {
+
+    if (
+        currentCategory === "all"
+    ) {
         return true;
     }
 
-    if (currentCategory === "featured") {
-        return Boolean(game.featured);
+
+    if (
+        currentCategory === "featured"
+    ) {
+        return Boolean(
+            game.featured
+        );
     }
 
-    if (currentCategory === "new") {
+
+    if (
+        currentCategory === "new"
+    ) {
+
         if (!game.created) {
             return false;
         }
@@ -577,80 +601,88 @@ function matchesCurrentCategory(game) {
         );
     }
 
+
     return (
         game.category ===
         currentCategory
     );
 }
 
+
 /* =========================================================
    OPEN GAME
 ========================================================= */
 
 function openGame(game) {
+
     if (!game || !game.file) {
         return;
     }
 
+
     currentGame = game;
 
-    if (elements.playerTitle) {
-        elements.playerTitle.textContent =
-            game.title;
-    }
 
-    if (elements.playerGameIcon) {
-        elements.playerGameIcon.textContent =
-            getInitial(game.title);
-    }
+    elements.playerTitle.textContent =
+        game.title;
 
-    if (elements.gameFrame) {
-        elements.gameFrame.src =
-            game.file;
-    }
 
-    if (elements.gamePlayer) {
-        elements.gamePlayer.classList.add(
-            "open"
-        );
+    elements.playerGameIcon.textContent =
+        getInitial(game.title);
 
-        elements.gamePlayer.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-    }
+
+    elements.gameFrame.src =
+        game.file;
+
+
+    elements.gamePlayer.classList.add(
+        "open"
+    );
+
+
+    elements.gamePlayer.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
 
     document.body.classList.add(
         "player-open"
     );
+
 
     history.pushState(
         {
             game: game.id
         },
         "",
-        `#play=${encodeURIComponent(
-            game.id
-        )}`
+        `#play=${encodeURIComponent(game.id)}`
     );
 }
+
 
 /* =========================================================
    OPEN FROM URL
 ========================================================= */
 
 function openGameFromHash() {
+
     const hash =
         window.location.hash;
 
-    if (!hash.startsWith("#play=")) {
+
+    if (
+        !hash.startsWith("#play=")
+    ) {
         return;
     }
+
 
     const id =
         decodeURIComponent(
             hash.substring(6)
         );
+
 
     const game =
         games.find(
@@ -658,44 +690,40 @@ function openGameFromHash() {
                 item.id === id
         );
 
+
     if (game) {
         openGameWithoutHistory(game);
     }
 }
 
+
 function openGameWithoutHistory(game) {
+
     currentGame = game;
 
-    if (elements.playerTitle) {
-        elements.playerTitle.textContent =
-            game.title;
-    }
+    elements.playerTitle.textContent =
+        game.title;
 
-    if (elements.playerGameIcon) {
-        elements.playerGameIcon.textContent =
-            getInitial(game.title);
-    }
+    elements.playerGameIcon.textContent =
+        getInitial(game.title);
 
-    if (elements.gameFrame) {
-        elements.gameFrame.src =
-            game.file;
-    }
+    elements.gameFrame.src =
+        game.file;
 
-    if (elements.gamePlayer) {
-        elements.gamePlayer.classList.add(
-            "open"
-        );
+    elements.gamePlayer.classList.add(
+        "open"
+    );
 
-        elements.gamePlayer.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-    }
+    elements.gamePlayer.setAttribute(
+        "aria-hidden",
+        "false"
+    );
 
     document.body.classList.add(
         "player-open"
     );
 }
+
 
 /* =========================================================
    CLOSE
@@ -704,32 +732,35 @@ function openGameWithoutHistory(game) {
 function closeGame(
     updateHistory = true
 ) {
-    if (elements.gamePlayer) {
-        elements.gamePlayer.classList.remove(
-            "open"
-        );
 
-        elements.gamePlayer.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-    }
+    elements.gamePlayer.classList.remove(
+        "open"
+    );
+
+
+    elements.gamePlayer.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
 
     document.body.classList.remove(
         "player-open"
     );
 
-    if (elements.gameFrame) {
-        elements.gameFrame.src =
-            "about:blank";
-    }
+
+    elements.gameFrame.src =
+        "about:blank";
+
 
     currentGame = null;
+
 
     if (
         updateHistory &&
         window.location.hash
     ) {
+
         history.pushState(
             {},
             "",
@@ -739,15 +770,14 @@ function closeGame(
     }
 }
 
+
 /* =========================================================
    RELOAD
 ========================================================= */
 
 function reloadGame() {
-    if (
-        !currentGame ||
-        !elements.gameFrame
-    ) {
+
+    if (!currentGame) {
         return;
     }
 
@@ -755,35 +785,44 @@ function reloadGame() {
         currentGame.file;
 }
 
+
 /* =========================================================
    FULLSCREEN
 ========================================================= */
 
 async function fullscreenGame() {
+
     try {
-        if (document.fullscreenElement) {
+
+        if (
+            document.fullscreenElement
+        ) {
+
             await document.exitFullscreen();
 
             return;
         }
 
+
         if (
-            elements.gameFrame &&
             elements.gameFrame.requestFullscreen
         ) {
+
             await elements.gameFrame.requestFullscreen();
 
             return;
         }
 
+
         if (
-            elements.gamePlayer &&
             elements.gamePlayer.requestFullscreen
         ) {
+
             await elements.gamePlayer.requestFullscreen();
         }
 
     } catch (error) {
+
         console.warn(
             "Fullscreen unavailable:",
             error
@@ -791,14 +830,17 @@ async function fullscreenGame() {
     }
 }
 
+
 /* =========================================================
    RANDOM GAME
 ========================================================= */
 
 function openRandomGame() {
+
     if (!games.length) {
         return;
     }
+
 
     const index =
         Math.floor(
@@ -806,74 +848,81 @@ function openRandomGame() {
             games.length
         );
 
-    openGame(games[index]);
+
+    openGame(
+        games[index]
+    );
 }
+
 
 /* =========================================================
    COUNTERS
 ========================================================= */
 
 function updateGameCounts() {
-    if (elements.heroGameCount) {
-        elements.heroGameCount.textContent =
-            games.length;
-    }
+
+    elements.heroGameCount.textContent =
+        games.length;
 }
 
+
 function updateGameCount() {
+
     const amount =
         filteredGames.length;
 
-    if (elements.gameCount) {
-        elements.gameCount.textContent =
-            `${amount} ${
-                amount === 1
-                    ? "game"
-                    : "games"
-            }`;
-    }
+
+    elements.gameCount.textContent =
+        `${amount} ${
+            amount === 1
+                ? "game"
+                : "games"
+        }`;
 }
+
 
 /* =========================================================
    LOADING
 ========================================================= */
 
 function showLoading(show) {
-    if (!elements.loadingState) {
-        return;
-    }
 
     elements.loadingState.hidden =
         !show;
 }
+
 
 /* =========================================================
    THEME
 ========================================================= */
 
 function loadTheme() {
+
     const theme =
         localStorage.getItem(
             "gamevault-theme"
         );
 
+
     if (theme === "light") {
+
         document.body.classList.add(
             "light"
         );
 
-        if (elements.themeButton) {
-            elements.themeButton.textContent =
-                "☾";
-        }
+        elements.themeButton.textContent =
+            "☾";
     }
 }
 
+
 function toggleTheme() {
+
     const light =
         document.body.classList.toggle(
             "light"
         );
+
 
     localStorage.setItem(
         "gamevault-theme",
@@ -882,109 +931,103 @@ function toggleTheme() {
             : "dark"
     );
 
-    if (elements.themeButton) {
-        elements.themeButton.textContent =
-            light
-                ? "☾"
-                : "☼";
-    }
+
+    elements.themeButton.textContent =
+        light
+            ? "☾"
+            : "☼";
 }
+
 
 /* =========================================================
    EVENTS
 ========================================================= */
 
 function setupEvents() {
-    if (elements.gameSearch) {
-        elements.gameSearch.addEventListener(
-            "input",
-            event => {
-                searchGames(
-                    event.target.value
-                );
-            }
-        );
-    }
 
-    if (elements.clearSearchButton) {
-        elements.clearSearchButton.addEventListener(
-            "click",
-            () => {
-                if (elements.gameSearch) {
-                    elements.gameSearch.value = "";
-                    searchGames("");
-                    elements.gameSearch.focus();
-                }
-            }
-        );
-    }
+    elements.gameSearch.addEventListener(
+        "input",
+        event => {
 
-    if (elements.browseButton) {
-        elements.browseButton.addEventListener(
-            "click",
-            () => {
-                const gamesSection =
-                    document.getElementById(
-                        "games"
-                    );
+            searchGames(
+                event.target.value
+            );
+        }
+    );
 
-                if (gamesSection) {
-                    gamesSection.scrollIntoView({
-                        behavior: "smooth"
-                    });
-                }
-            }
-        );
-    }
 
-    if (elements.luckyButton) {
-        elements.luckyButton.addEventListener(
-            "click",
-            openRandomGame
-        );
-    }
+    elements.clearSearchButton.addEventListener(
+        "click",
+        () => {
 
-    if (elements.randomGameButton) {
-        elements.randomGameButton.addEventListener(
-            "click",
-            openRandomGame
-        );
-    }
+            elements.gameSearch.value = "";
 
-    if (elements.closeGameButton) {
-        elements.closeGameButton.addEventListener(
-            "click",
-            () => closeGame()
-        );
-    }
+            searchGames("");
 
-    if (elements.reloadGameButton) {
-        elements.reloadGameButton.addEventListener(
-            "click",
-            reloadGame
-        );
-    }
+            elements.gameSearch.focus();
+        }
+    );
 
-    if (elements.fullscreenButton) {
-        elements.fullscreenButton.addEventListener(
-            "click",
-            fullscreenGame
-        );
-    }
 
-    if (elements.themeButton) {
-        elements.themeButton.addEventListener(
-            "click",
-            toggleTheme
-        );
-    }
+    elements.browseButton.addEventListener(
+        "click",
+        () => {
+
+            document
+                .getElementById("games")
+                .scrollIntoView({
+                    behavior: "smooth"
+                });
+        }
+    );
+
+
+    elements.luckyButton.addEventListener(
+        "click",
+        openRandomGame
+    );
+
+
+    elements.randomGameButton.addEventListener(
+        "click",
+        openRandomGame
+    );
+
+
+    elements.closeGameButton.addEventListener(
+        "click",
+        () => closeGame()
+    );
+
+
+    elements.reloadGameButton.addEventListener(
+        "click",
+        reloadGame
+    );
+
+
+    elements.fullscreenButton.addEventListener(
+        "click",
+        fullscreenGame
+    );
+
+
+    elements.themeButton.addEventListener(
+        "click",
+        toggleTheme
+    );
+
 
     document
-        .querySelectorAll(".category-button")
+        .querySelectorAll(
+            ".category-button"
+        )
         .forEach(button => {
+
             button.addEventListener(
                 "click",
                 () => {
+
                     document
                         .querySelectorAll(
                             ".category-button"
@@ -996,72 +1039,78 @@ function setupEvents() {
                                 )
                         );
 
+
                     button.classList.add(
                         "active"
                     );
 
+
                     currentCategory =
                         button.dataset.category;
 
+
                     searchGames(
-                        elements.gameSearch
-                            ? elements.gameSearch.value
-                            : ""
+                        elements.gameSearch.value
                     );
                 }
             );
         });
 
+
     document.addEventListener(
         "keydown",
         event => {
+
             if (
                 event.key === "Escape" &&
-                elements.gamePlayer &&
                 elements.gamePlayer.classList.contains(
                     "open"
                 )
             ) {
+
                 closeGame();
 
                 return;
             }
 
+
             if (
                 event.key === "/" &&
-                document.activeElement &&
                 document.activeElement.tagName !== "INPUT" &&
                 document.activeElement.tagName !== "TEXTAREA"
             ) {
+
                 event.preventDefault();
 
-                if (elements.gameSearch) {
-                    elements.gameSearch.focus();
-                }
+                elements.gameSearch.focus();
             }
         }
     );
 
+
     window.addEventListener(
         "popstate",
         () => {
+
             if (
-                elements.gamePlayer &&
                 elements.gamePlayer.classList.contains(
                     "open"
                 )
             ) {
+
                 closeGame(false);
             }
         }
     );
 }
 
+
 /* =========================================================
    HELPERS
 ========================================================= */
 
 function getInitial(text) {
+
     return (
         String(text || "G")
             .trim()
@@ -1071,21 +1120,26 @@ function getInitial(text) {
     );
 }
 
+
 function escapeHTML(value) {
+
     return String(value)
         .replace(
             /[&<>"']/g,
             character => ({
+
                 "&": "&amp;",
                 "<": "&lt;",
                 ">": "&gt;",
                 '"': "&quot;",
                 "'": "&#039;"
+
             })[character]
         );
 }
 
+
 function escapeAttribute(value) {
+
     return escapeHTML(value);
 }
-```
