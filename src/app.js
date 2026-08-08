@@ -408,6 +408,7 @@ function createGameImage(game) {
 }
 
 
+```javascript
 function setupGameImageSlideshow(card) {
     const imageContainer =
         card.querySelector(".game-image");
@@ -415,6 +416,89 @@ function setupGameImageSlideshow(card) {
     if (!imageContainer) {
         return;
     }
+
+    const images =
+        Array.from(
+            imageContainer.querySelectorAll("img")
+        );
+
+    /*
+     * Nothing to animate if there is only
+     * one image.
+     */
+    if (images.length <= 1) {
+        return;
+    }
+
+    let currentIndex = 0;
+    let slideshowTimer = null;
+
+    function showImage(index) {
+        images.forEach((image, imageIndex) => {
+            image.classList.toggle(
+                "active",
+                imageIndex === index
+            );
+        });
+
+        currentIndex = index;
+    }
+
+    function startSlideshow() {
+        if (slideshowTimer !== null) {
+            return;
+        }
+
+        /*
+         * Start with the main image.
+         */
+        showImage(0);
+
+        /*
+         * Change image every 2.2 seconds.
+         */
+        slideshowTimer = window.setInterval(() => {
+            const nextIndex =
+                (currentIndex + 1) %
+                images.length;
+
+            showImage(nextIndex);
+        }, 2200);
+    }
+
+    function stopSlideshow() {
+        if (slideshowTimer !== null) {
+            window.clearInterval(
+                slideshowTimer
+            );
+
+            slideshowTimer = null;
+        }
+
+        /*
+         * Return to the main image.
+         */
+        showImage(0);
+    }
+
+    /*
+     * Start when hovering over the game card.
+     */
+    card.addEventListener(
+        "mouseenter",
+        startSlideshow
+    );
+
+    /*
+     * Stop when leaving the card.
+     */
+    card.addEventListener(
+        "mouseleave",
+        stopSlideshow
+    );
+}
+```
+
 
     const images =
         Array.from(
