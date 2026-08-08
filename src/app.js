@@ -113,6 +113,9 @@ function normalizeGame(game) {
         game.title ||
         prettifyName(id);
 
+    /*
+     * Convert an image value into a usable URL.
+     */
     function normalizeImage(image) {
         if (!image) {
             return null;
@@ -125,6 +128,9 @@ function normalizeGame(game) {
             return null;
         }
 
+        /*
+         * External image URL.
+         */
         if (
             value.startsWith("http://") ||
             value.startsWith("https://") ||
@@ -134,14 +140,23 @@ function normalizeGame(game) {
             return value;
         }
 
+        /*
+         * Existing local image.
+         */
         return value.startsWith("/")
             ? value
             : `../${value}`;
     }
 
+    /*
+     * Main image.
+     */
     const image =
         normalizeImage(game.image);
 
+    /*
+     * Hover images.
+     */
     const hoverImages =
         Array.isArray(game.hoverImages)
             ? game.hoverImages
@@ -255,7 +270,8 @@ function createGameCard(game, index) {
     const card =
         document.createElement("article");
 
-    card.className = "game-card";
+    card.className =
+        "game-card";
 
     card.tabIndex = 0;
 
@@ -299,20 +315,22 @@ function createGameCard(game, index) {
         </div>
     `;
 
+    /*
+     * Open game when the card is clicked.
+     */
     card.addEventListener(
         "click",
         () => openGame(game)
     );
 
     /*
-     * Start the hover slideshow.
-     *
-     * IMPORTANT:
-     * This must happen AFTER innerHTML
-     * creates the images.
+     * Start the image slideshow.
      */
     setupGameImageSlideshow(card);
 
+    /*
+     * Keyboard support.
+     */
     card.addEventListener(
         "keydown",
         event => {
@@ -342,6 +360,9 @@ function createGameImage(game) {
             : [])
     ].filter(Boolean);
 
+    /*
+     * No images.
+     */
     if (!images.length) {
         return `
             <div class="game-placeholder">
@@ -350,6 +371,12 @@ function createGameImage(game) {
         `;
     }
 
+    /*
+     * Create all images.
+     *
+     * The first image is active.
+     * CSS handles the fading between images.
+     */
     return images
         .map(
             (image, index) => `
@@ -379,7 +406,7 @@ function createGameImage(game) {
 }
 
 /* =========================================================
-   GAME IMAGE SLIDESHOW
+   IMAGE SLIDESHOW
 ========================================================= */
 
 function setupGameImageSlideshow(card) {
@@ -396,25 +423,14 @@ function setupGameImageSlideshow(card) {
         );
 
     /*
-     * DEBUG:
-     * This tells us how many images
-     * actually made it into the card.
-     */
-    console.log(
-        "SLIDESHOW IMAGES:",
-        images.length
-    );
-
-    /*
-     * One image means there is nothing
-     * to alternate.
+     * If there is only one image,
+     * there is nothing to alternate.
      */
     if (images.length <= 1) {
         return;
     }
 
     let currentIndex = 0;
-
     let slideshowTimer = null;
 
     function showImage(index) {
@@ -431,17 +447,20 @@ function setupGameImageSlideshow(card) {
     }
 
     function startSlideshow() {
+        /*
+         * Prevent multiple timers.
+         */
         if (slideshowTimer) {
             return;
         }
 
         /*
-         * Always begin with the main image.
+         * Start with the main image.
          */
         showImage(0);
 
         /*
-         * Change image every 2.2 seconds.
+         * Change images every 2.2 seconds.
          */
         slideshowTimer =
             setInterval(
@@ -452,11 +471,6 @@ function setupGameImageSlideshow(card) {
                         ) %
                         images.length;
 
-                    console.log(
-                        "SLIDESHOW CHANGING:",
-                        nextIndex
-                    );
-
                     showImage(
                         nextIndex
                     );
@@ -466,6 +480,9 @@ function setupGameImageSlideshow(card) {
     }
 
     function stopSlideshow() {
+        /*
+         * Stop the timer.
+         */
         if (slideshowTimer) {
             clearInterval(
                 slideshowTimer
@@ -480,11 +497,17 @@ function setupGameImageSlideshow(card) {
         showImage(0);
     }
 
+    /*
+     * Start when hovering over the card.
+     */
     card.addEventListener(
         "mouseenter",
         startSlideshow
     );
 
+    /*
+     * Stop when leaving the card.
+     */
     card.addEventListener(
         "mouseleave",
         stopSlideshow
