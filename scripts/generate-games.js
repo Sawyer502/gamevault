@@ -1,16 +1,26 @@
-```javascript
 const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
 
-const GAMES_DIR = path.join(ROOT, "games");
-const GAMES_JSON = path.join(ROOT, "games.json");
-const GAME_METADATA = path.join(
-    ROOT,
-    "scripts",
-    "game-metadata.json"
-);
+const GAMES_DIR =
+    path.join(
+        ROOT,
+        "games"
+    );
+
+const GAMES_JSON =
+    path.join(
+        ROOT,
+        "games.json"
+    );
+
+const GAME_METADATA =
+    path.join(
+        ROOT,
+        "scripts",
+        "game-metadata.json"
+    );
 
 
 /* =========================================================
@@ -18,12 +28,18 @@ const GAME_METADATA = path.join(
 ========================================================= */
 
 if (!fs.existsSync(GAMES_DIR)) {
-    fs.mkdirSync(GAMES_DIR, {
-        recursive: true
-    });
+
+    fs.mkdirSync(
+        GAMES_DIR,
+        {
+            recursive: true
+        }
+    );
 }
 
+
 if (!fs.existsSync(GAME_METADATA)) {
+
     fs.writeFileSync(
         GAME_METADATA,
         "{}\n",
@@ -38,16 +54,22 @@ if (!fs.existsSync(GAME_METADATA)) {
 
 let metadata = {};
 
+
 try {
-    const content = fs
-        .readFileSync(
-            GAME_METADATA,
-            "utf8"
-        )
-        .trim();
+
+    const content =
+        fs
+            .readFileSync(
+                GAME_METADATA,
+                "utf8"
+            )
+            .trim();
+
 
     if (content) {
-        metadata = JSON.parse(content);
+
+        metadata =
+            JSON.parse(content);
     }
 
 } catch (error) {
@@ -56,7 +78,9 @@ try {
         "\nERROR: game-metadata.json is invalid.\n"
     );
 
-    console.error(error.message);
+    console.error(
+        error.message
+    );
 
     process.exit(1);
 }
@@ -66,28 +90,16 @@ try {
    CLEAN IMAGE URL
 ========================================================= */
 
-/*
- * Accepts:
- *
- * https://example.com/image.png
- *
- * OR Markdown:
- *
- * [https://example.com/image.png](https://example.com/image.png)
- *
- * and returns:
- *
- * https://example.com/image.png
- */
-
 function cleanImageUrl(value) {
 
     if (!value) {
         return "";
     }
 
+
     let url =
         String(value).trim();
+
 
     if (!url) {
         return "";
@@ -95,8 +107,9 @@ function cleanImageUrl(value) {
 
 
     /*
-     * Remove Markdown image/link
-     * formatting.
+     * Handle Markdown:
+     *
+     * [https://example.com/image.png](https://example.com/image.png)
      */
 
     const markdownMatch =
@@ -104,7 +117,9 @@ function cleanImageUrl(value) {
             /^\[.*?\]\((.*?)\)$/
         );
 
+
     if (markdownMatch) {
+
         url =
             markdownMatch[1].trim();
     }
@@ -135,8 +150,13 @@ function cleanHoverImages(value) {
         return [];
     }
 
+
     return value
-        .map(cleanImageUrl)
+
+        .map(
+            cleanImageUrl
+        )
+
         .filter(Boolean);
 }
 
@@ -211,7 +231,11 @@ function createId(filename) {
 ========================================================= */
 
 const files =
-    fs.readdirSync(GAMES_DIR)
+
+    fs
+        .readdirSync(
+            GAMES_DIR
+        )
 
         .filter(
             file =>
@@ -238,74 +262,98 @@ const files =
 ========================================================= */
 
 const games =
-    files.map(file => {
 
-        const id =
-            createId(file);
+    files.map(
+        file => {
 
+            /*
+             * The filename is the source of truth.
+             */
 
-        /*
-         * Find metadata for this game.
-         */
-
-        const info =
-            metadata[id] || {};
+            const id =
+                createId(file);
 
 
-        /*
-         * If metadata is missing,
-         * use sensible defaults.
-         */
+            /*
+             * Find metadata using
+             * the same ID as the importer.
+             */
 
-        const title =
-            info.title ||
-            prettifyName(file);
-
-
-        const image =
-            cleanImageUrl(
-                info.image
-            );
+            const info =
+                metadata[id] || {};
 
 
-        const hoverImages =
-            cleanHoverImages(
-                info.hoverImages
-            );
+            /*
+             * Title.
+             */
+
+            const title =
+                info.title ||
+                prettifyName(file);
 
 
-        const created =
-            info.created ||
-            new Date()
-                .toISOString()
-                .slice(0, 10);
+            /*
+             * Images.
+             */
+
+            const image =
+                cleanImageUrl(
+                    info.image
+                );
 
 
-        return {
+            const hoverImages =
+                cleanHoverImages(
+                    info.hoverImages
+                );
 
-            id,
 
-            title,
+            /*
+             * Created date.
+             */
 
-            file:
-                `games/${file}`,
+            const created =
+                info.created ||
 
-            image,
+                new Date()
+                    .toISOString()
+                    .slice(0, 10);
 
-            hoverImages,
 
-            category:
-                info.category ||
-                "all",
+            /*
+             * Final game object.
+             */
 
-            featured:
-                Boolean(
-                    info.featured
-                ),
+            return {
 
-            created
-        };
-    });
+                id,
+
+                title,
+
+                /*
+                 * Root-relative path.
+                 */
+
+                file:
+                    `/games/${encodeURIComponent(file)}`,
+
+                image,
+
+                hoverImages,
+
+                category:
+                    info.category ||
+                    "all",
+
+                featured:
+                    Boolean(
+                        info.featured
+                    ),
+
+                created
+            };
+        }
+    );
 
 
 /* =========================================================
@@ -341,6 +389,7 @@ if (games.length > 0) {
         "Games found:"
     );
 
+
     games.forEach(
         game => {
 
@@ -350,7 +399,9 @@ if (games.length > 0) {
         }
     );
 
+
     console.log("");
+
 
 } else {
 
@@ -362,4 +413,3 @@ if (games.length > 0) {
         `  Checked: ${GAMES_DIR}\n`
     );
 }
-```
