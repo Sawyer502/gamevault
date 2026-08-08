@@ -337,27 +337,28 @@ function createGameCard(game, index) {
     `;
 
 
-    card.addEventListener(
-        "click",
-        () => openGame(game)
-    );
+   card.addEventListener(
+    "click",
+    () => openGame(game)
+);
 
+setupGameImageSlideshow(card);
 
-    card.addEventListener(
-        "keydown",
-        event => {
+card.addEventListener(
+    "keydown",
+    event => {
 
-            if (
-                event.key === "Enter" ||
-                event.key === " "
-            ) {
+        if (
+            event.key === "Enter" ||
+            event.key === " "
+        ) {
 
-                event.preventDefault();
+            event.preventDefault();
 
-                openGame(game);
-            }
+            openGame(game);
         }
-    );
+    }
+);
 
 
     return card;
