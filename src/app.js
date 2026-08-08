@@ -376,9 +376,6 @@ function createGameImage(game) {
             : [])
     ].filter(Boolean);
 
-    /*
-     * No images at all.
-     */
     if (!images.length) {
         return `
             <div class="game-placeholder">
@@ -386,6 +383,19 @@ function createGameImage(game) {
             </div>
         `;
     }
+
+    return `
+        <img
+            src="${escapeAttribute(images[0])}"
+            alt="${escapeAttribute(game.title)}"
+            loading="eager"
+            data-slideshow-images="${escapeAttribute(
+                JSON.stringify(images)
+            )}"
+            data-image-index="0"
+        >
+    `;
+}
 
     /*
      * Every image is placed in the same
@@ -408,7 +418,7 @@ function createGameImage(game) {
 }
 
 
-```javascript
+
 function setupGameImageSlideshow(card) {
     const imageContainer =
         card.querySelector(".game-image");
@@ -417,32 +427,102 @@ function setupGameImageSlideshow(card) {
         return;
     }
 
-    const images =
-        Array.from(
-            imageContainer.querySelectorAll("img")
+    const image =
+        imageContainer.querySelector(
+            "img[data-slideshow-images]"
         );
 
-    /*
-     * Nothing to animate if there is only
-     * one image.
-     */
-    if (images.length <= 1) {
+    if (!image) {
+        return;
+    }
+
+    let images;
+
+    try {
+        images = JSON.parse(
+            image.dataset.slideshowImages
+        );
+    } catch (error) {
+        console.warn(
+            "Could not read slideshow images:",
+            error
+        );
+
+        return;
+    }
+
+    if (
+        !Array.isArray(images) ||
+        images.length <= 1
+    ) {
         return;
     }
 
     let currentIndex = 0;
     let slideshowTimer = null;
 
-    function showImage(index) {
-        images.forEach((image, imageIndex) => {
-            image.classList.toggle(
-                "active",
-                imageIndex === index
-            );
-        });
+    function showNextImage() {
+        currentIndex =
+            (currentIndex + 1) %
+            images.length;
 
-        currentIndex = index;
+        image.style.opacity = "0";
+
+        window.setTimeout(() => {
+            image.src =
+                images[currentIndex];
+
+            image.dataset.imageIndex =
+                currentIndex;
+
+            image.style.opacity = "1";
+        }, 250);
     }
+
+    function startSlideshow() {
+        if (slideshowTimer !== null) {
+            return;
+        }
+
+        /*
+         * Start changing images after
+         * the user hovers over the card.
+         */
+        slideshowTimer =
+            window.setInterval(
+                showNextImage,
+                2200
+            );
+    }
+
+    function stopSlideshow() {
+        if (slideshowTimer !== null) {
+            window.clearInterval(
+                slideshowTimer
+            );
+
+            slideshowTimer = null;
+        }
+
+        currentIndex = 0;
+
+        image.style.opacity = "1";
+
+        image.src = images[0];
+
+        image.dataset.imageIndex = "0";
+    }
+
+    card.addEventListener(
+        "mouseenter",
+        startSlideshow
+    );
+
+    card.addEventListener(
+        "mouseleave",
+        stopSlideshow
+    );
+}
 
     function startSlideshow() {
         if (slideshowTimer !== null) {
@@ -497,7 +577,7 @@ function setupGameImageSlideshow(card) {
         stopSlideshow
     );
 }
-```
+
 
 
     const images =
