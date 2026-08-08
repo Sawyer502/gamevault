@@ -8,9 +8,10 @@ const METADATA_FILE = path.join(
     "game-metadata.json"
 );
 
-/*
- * Load existing metadata.
- */
+
+/* =========================================================
+   LOAD METADATA
+========================================================= */
 
 function loadMetadata() {
 
@@ -38,13 +39,16 @@ function loadMetadata() {
             "ERROR: game-metadata.json contains invalid JSON."
         );
 
+        console.error(error.message);
+
         process.exit(1);
     }
 }
 
-/*
- * Save metadata.
- */
+
+/* =========================================================
+   SAVE METADATA
+========================================================= */
 
 function saveMetadata(metadata) {
 
@@ -61,15 +65,21 @@ function saveMetadata(metadata) {
     );
 }
 
-/*
- * Create an ID from the game title.
- */
+
+/* =========================================================
+   CREATE ID
+========================================================= */
 
 function createId(value) {
 
     return String(value)
 
         .toLowerCase()
+
+        .replace(
+            /\.html$/i,
+            ""
+        )
 
         .replace(
             /[^a-z0-9]+/g,
@@ -82,9 +92,10 @@ function createId(value) {
         );
 }
 
-/*
- * Usage information.
- */
+
+/* =========================================================
+   USAGE
+========================================================= */
 
 function showUsage() {
 
@@ -101,28 +112,19 @@ npm.cmd run import-game -- "Konkr.io" "games/konkr io.html" "https://example.com
 
 The number of hover images is unlimited.
 
-You can provide:
-
-0 hover images
-1 hover image
-2 hover images
-4 hover images
-10 hover images
-etc.
-
-The importer DOES NOT download images.
-
-It only stores the URLs.
+The importer does not download images.
+It only stores the image URLs.
 `);
-
 }
 
-/*
- * Read command-line arguments.
- */
+
+/* =========================================================
+   ARGUMENTS
+========================================================= */
 
 const args =
     process.argv.slice(2);
+
 
 if (args.length < 3) {
 
@@ -131,14 +133,18 @@ if (args.length < 3) {
     process.exit(1);
 }
 
+
 const title =
     args[0];
+
 
 const htmlFile =
     args[1];
 
+
 const mainImage =
     args[2];
+
 
 /*
  * Everything after the first three
@@ -150,31 +156,62 @@ const hoverImages =
         .slice(3)
         .filter(Boolean);
 
+
+/* =========================================================
+   GAME ID
+========================================================= */
+
 /*
- * Create the ID.
+ * IMPORTANT:
+ *
+ * The HTML filename is the permanent ID.
+ *
+ * Example:
+ *
+ * games/konkr io.html
+ *
+ * becomes:
+ *
+ * konkr-io
+ *
+ * This matches generate-games.js.
  */
+
+const filename =
+    path.basename(
+        htmlFile
+    );
+
 
 const id =
-    createId(title);
+    createId(filename);
 
-/*
- * Load existing metadata.
- */
+
+if (!id) {
+
+    console.error(
+        "ERROR: Could not create a valid game ID from the HTML filename."
+    );
+
+    process.exit(1);
+}
+
+
+/* =========================================================
+   LOAD EXISTING METADATA
+========================================================= */
 
 const metadata =
     loadMetadata();
 
-/*
- * Preserve existing information
- * when updating a game.
- */
 
 const existing =
     metadata[id] || {};
 
-/*
- * Save the game information.
- */
+
+/* =========================================================
+   SAVE GAME
+========================================================= */
 
 metadata[id] = {
 
@@ -193,8 +230,9 @@ metadata[id] = {
         "all",
 
     featured:
-        existing.featured ||
-        false,
+        Boolean(
+            existing.featured
+        ),
 
     created:
         existing.created ||
@@ -203,21 +241,27 @@ metadata[id] = {
             .slice(0, 10)
 };
 
-/*
- * Write metadata.
- */
+
+/* =========================================================
+   WRITE METADATA
+========================================================= */
 
 saveMetadata(metadata);
 
-/*
- * Make sure the game file exists.
- */
+
+/* =========================================================
+   CHECK GAME FILE
+========================================================= */
 
 const gamePath =
     path.join(
         ROOT,
         htmlFile
     );
+
+
+console.log("");
+
 
 if (!fs.existsSync(gamePath)) {
 
@@ -236,14 +280,17 @@ if (!fs.existsSync(gamePath)) {
     );
 }
 
-/*
- * Display what was imported.
- */
 
-console.log("");
+/* =========================================================
+   REPORT
+========================================================= */
 
 console.log(
     `✓ Game: ${title}`
+);
+
+console.log(
+    `✓ ID: ${id}`
 );
 
 console.log(
