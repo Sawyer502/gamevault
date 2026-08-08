@@ -29,10 +29,7 @@ const elements = {
     themeButton: document.getElementById("themeButton")
 };
 
-document.addEventListener(
-    "DOMContentLoaded",
-    initialize
-);
+document.addEventListener("DOMContentLoaded", initialize);
 
 async function initialize() {
     loadTheme();
@@ -52,16 +49,13 @@ async function loadGames() {
     showLoading(true);
 
     try {
-        const response = await fetch(
-            "../games.json",
-            {
-                cache: "no-store"
-            }
-        );
+        const response = await fetch("/games.json", {
+            cache: "no-store"
+        });
 
         if (!response.ok) {
             throw new Error(
-                "games.json could not be loaded."
+                `games.json could not be loaded. HTTP ${response.status}`
             );
         }
 
@@ -73,7 +67,9 @@ async function loadGames() {
             );
         }
 
-        games = data.map(normalizeGame);
+        games = data
+            .map(normalizeGame)
+            .filter(Boolean);
 
         filteredGames = [...games];
 
@@ -81,16 +77,18 @@ async function loadGames() {
 
         renderGames();
 
-    } catch (error) {
-        console.error(
-            "GameVault error:",
-            error
+        console.log(
+            `GameVault loaded ${games.length} game(s).`,
+            games
         );
 
-        games = [];
+    } catch (error) {
+        console.error("GameVault error:", error);
 
+        games = [];
         filteredGames = [];
 
+        updateGameCounts();
         renderGames();
 
     } finally {
@@ -103,28 +101,37 @@ async function loadGames() {
 ========================================================= */
 
 function normalizeGame(game) {
+    if (!game || typeof game !== "object") {
+        return null;
+    }
+
     const id = String(
         game.id ||
         game.title ||
         "game"
-    );
+    ).trim();
 
     const title =
-        game.title ||
-        prettifyName(id);
+        String(
+            game.title ||
+            prettifyName(id)
+        ).trim();
 
     function normalizeImage(image) {
         if (!image) {
             return null;
         }
 
-        const value =
-            String(image).trim();
+        const value = String(image).trim();
 
         if (!value) {
             return null;
         }
 
+        /*
+         * External images:
+         * IGDB, HTTPS URLs, data URLs, etc.
+         */
         if (
             value.startsWith("http://") ||
             value.startsWith("https://") ||
@@ -134,9 +141,13 @@ function normalizeGame(game) {
             return value;
         }
 
+        /*
+         * Local images are always loaded from
+         * the website root.
+         */
         return value.startsWith("/")
             ? value
-            : `../${value}`;
+            : `/${value}`;
     }
 
     const image =
@@ -149,6 +160,18 @@ function normalizeGame(game) {
                 .filter(Boolean)
             : [];
 
+    let file = game.file;
+
+    if (file) {
+        file = String(file).trim();
+
+        if (!file.startsWith("/")) {
+            file = `/${file}`;
+        }
+    } else {
+        file = `/games/${id}.html`;
+    }
+
     return {
         ...game,
 
@@ -156,9 +179,7 @@ function normalizeGame(game) {
 
         title,
 
-        file:
-            game.file ||
-            `games/${id}.html`,
+        file,
 
         image,
 
@@ -183,27 +204,14 @@ function normalizeGame(game) {
 
 function prettifyName(name) {
     return String(name)
-        .replace(
-            /\.html$/i,
-            ""
-        )
-        .replace(
-            /[-_]+/g,
-            " "
-        )
-        .replace(
-            /([a-z])([A-Z])/g,
-            "$1 $2"
-        )
-        .replace(
-            /\s+/g,
-            " "
-        )
+        .replace(/\.html$/i, "")
+        .replace(/[-_]+/g, " ")
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/\s+/g, " ")
         .trim()
         .replace(
             /\b\w/g,
-            character =>
-                character.toUpperCase()
+            character => character.toUpperCase()
         );
 }
 
@@ -212,37 +220,37 @@ function prettifyName(name) {
 ========================================================= */
 
 function renderGames() {
+    if (!elements.gamesGrid) {
+        return;
+    }
+
     elements.gamesGrid.innerHTML = "";
 
     if (!filteredGames.length) {
-        elements.emptyState.hidden = false;
+        if (elements.emptyState) {
+            elements.emptyState.hidden = false;
+        }
 
-        elements.gamesGrid.style.display =
-            "none";
+        elements.gamesGrid.style.display = "none";
 
         updateGameCount();
 
         return;
     }
 
-    elements.emptyState.hidden = true;
+    if (elements.emptyState) {
+        elements.emptyState.hidden = true;
+    }
 
-    elements.gamesGrid.style.display =
-        "grid";
+    elements.gamesGrid.style.display = "grid";
 
-    filteredGames.forEach(
-        (game, index) => {
-            const card =
-                createGameCard(
-                    game,
-                    index
-                );
+    filteredGames.forEach((game, index) => {
+        const card = createGameCard(game, index);
 
-            elements.gamesGrid.appendChild(
-                card
-            );
+        if (card) {
+            elements.gamesGrid.appendChild(card);
         }
-    );
+    });
 
     updateGameCount();
 }
@@ -255,8 +263,7 @@ function createGameCard(game, index) {
     const card =
         document.createElement("article");
 
-    card.className =
-        "game-card";
+    card.className = "game-card";
 
     card.tabIndex = 0;
 
@@ -274,7 +281,7 @@ function createGameCard(game, index) {
 
                 <div
                     class="game-name"
-                    title="${escapeHTML(game.title)}"
+                    title="${escapeAttribute(game.title)}"
                 >
                     ${escapeHTML(game.title)}
                 </div>
@@ -300,30 +307,43 @@ function createGameCard(game, index) {
         </div>
     `;
 
-    card.addEventListener(
-        "click",
-        () => openGame(game)
-    );
+    /*
+     * Clicking anywhere on the card launches
+     * the game.
+     */
+    card.addEventListener("click", event => {
+        /*
+         * Prevent the button click from causing
+         * duplicate handling.
+         */
+        if (
+            event.target.closest(".play-button")
+        ) {
+            openGame(game);
+            return;
+        }
+
+        openGame(game);
+    });
 
     /*
-     * Set up slideshow after the images
-     * have been inserted into the card.
+     * Image slideshow.
      */
     setupGameImageSlideshow(card);
 
-    card.addEventListener(
-        "keydown",
-        event => {
-            if (
-                event.key === "Enter" ||
-                event.key === " "
-            ) {
-                event.preventDefault();
+    /*
+     * Keyboard accessibility.
+     */
+    card.addEventListener("keydown", event => {
+        if (
+            event.key === "Enter" ||
+            event.key === " "
+        ) {
+            event.preventDefault();
 
-                openGame(game);
-            }
+            openGame(game);
         }
-    );
+    });
 
     return card;
 }
@@ -340,6 +360,10 @@ function createGameImage(game) {
             : [])
     ].filter(Boolean);
 
+    /*
+     * Games without artwork still get
+     * a proper placeholder.
+     */
     if (!images.length) {
         return `
             <div class="game-placeholder">
@@ -357,12 +381,8 @@ function createGameImage(game) {
                             ? "active"
                             : ""
                     }"
-                    src="${escapeAttribute(
-                        image
-                    )}"
-                    alt="${escapeAttribute(
-                        game.title
-                    )}"
+                    src="${escapeAttribute(image)}"
+                    alt="${escapeAttribute(game.title)}"
                     loading="${
                         index === 0
                             ? "eager"
@@ -392,6 +412,10 @@ function setupGameImageSlideshow(card) {
             imageContainer.querySelectorAll("img")
         );
 
+    /*
+     * No slideshow needed if there is
+     * zero or one image.
+     */
     if (images.length <= 1) {
         return;
     }
@@ -420,20 +444,15 @@ function setupGameImageSlideshow(card) {
         showImage(0);
 
         slideshowTimer =
-            window.setInterval(
-                () => {
-                    const nextIndex =
-                        (
-                            currentIndex + 1
-                        ) %
-                        images.length;
+            window.setInterval(() => {
+                const nextIndex =
+                    (
+                        currentIndex + 1
+                    ) %
+                    images.length;
 
-                    showImage(
-                        nextIndex
-                    );
-                },
-                2200
-            );
+                showImage(nextIndex);
+            }, 2200);
     }
 
     function stopSlideshow() {
@@ -455,6 +474,20 @@ function setupGameImageSlideshow(card) {
 
     card.addEventListener(
         "mouseleave",
+        stopSlideshow
+    );
+
+    /*
+     * Also allow keyboard users to see
+     * the slideshow while focused.
+     */
+    card.addEventListener(
+        "focus",
+        startSlideshow
+    );
+
+    card.addEventListener(
+        "blur",
         stopSlideshow
     );
 }
@@ -486,7 +519,7 @@ function getGameMeta(game) {
 
 function searchGames(query) {
     const normalized =
-        query
+        String(query || "")
             .trim()
             .toLowerCase();
 
@@ -502,9 +535,7 @@ function searchGames(query) {
                     .includes(normalized);
 
             const matchesCategory =
-                matchesCurrentCategory(
-                    game
-                );
+                matchesCurrentCategory(game);
 
             return (
                 matchesSearch &&
@@ -520,23 +551,15 @@ function searchGames(query) {
 ========================================================= */
 
 function matchesCurrentCategory(game) {
-    if (
-        currentCategory === "all"
-    ) {
+    if (currentCategory === "all") {
         return true;
     }
 
-    if (
-        currentCategory === "featured"
-    ) {
-        return Boolean(
-            game.featured
-        );
+    if (currentCategory === "featured") {
+        return Boolean(game.featured);
     }
 
-    if (
-        currentCategory === "new"
-    ) {
+    if (currentCategory === "new") {
         if (!game.created) {
             return false;
         }
@@ -571,23 +594,31 @@ function openGame(game) {
 
     currentGame = game;
 
-    elements.playerTitle.textContent =
-        game.title;
+    if (elements.playerTitle) {
+        elements.playerTitle.textContent =
+            game.title;
+    }
 
-    elements.playerGameIcon.textContent =
-        getInitial(game.title);
+    if (elements.playerGameIcon) {
+        elements.playerGameIcon.textContent =
+            getInitial(game.title);
+    }
 
-    elements.gameFrame.src =
-        game.file;
+    if (elements.gameFrame) {
+        elements.gameFrame.src =
+            game.file;
+    }
 
-    elements.gamePlayer.classList.add(
-        "open"
-    );
+    if (elements.gamePlayer) {
+        elements.gamePlayer.classList.add(
+            "open"
+        );
 
-    elements.gamePlayer.setAttribute(
-        "aria-hidden",
-        "false"
-    );
+        elements.gamePlayer.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+    }
 
     document.body.classList.add(
         "player-open"
@@ -612,9 +643,7 @@ function openGameFromHash() {
     const hash =
         window.location.hash;
 
-    if (
-        !hash.startsWith("#play=")
-    ) {
+    if (!hash.startsWith("#play=")) {
         return;
     }
 
@@ -630,32 +659,38 @@ function openGameFromHash() {
         );
 
     if (game) {
-        openGameWithoutHistory(
-            game
-        );
+        openGameWithoutHistory(game);
     }
 }
 
 function openGameWithoutHistory(game) {
     currentGame = game;
 
-    elements.playerTitle.textContent =
-        game.title;
+    if (elements.playerTitle) {
+        elements.playerTitle.textContent =
+            game.title;
+    }
 
-    elements.playerGameIcon.textContent =
-        getInitial(game.title);
+    if (elements.playerGameIcon) {
+        elements.playerGameIcon.textContent =
+            getInitial(game.title);
+    }
 
-    elements.gameFrame.src =
-        game.file;
+    if (elements.gameFrame) {
+        elements.gameFrame.src =
+            game.file;
+    }
 
-    elements.gamePlayer.classList.add(
-        "open"
-    );
+    if (elements.gamePlayer) {
+        elements.gamePlayer.classList.add(
+            "open"
+        );
 
-    elements.gamePlayer.setAttribute(
-        "aria-hidden",
-        "false"
-    );
+        elements.gamePlayer.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+    }
 
     document.body.classList.add(
         "player-open"
@@ -669,21 +704,25 @@ function openGameWithoutHistory(game) {
 function closeGame(
     updateHistory = true
 ) {
-    elements.gamePlayer.classList.remove(
-        "open"
-    );
+    if (elements.gamePlayer) {
+        elements.gamePlayer.classList.remove(
+            "open"
+        );
 
-    elements.gamePlayer.setAttribute(
-        "aria-hidden",
-        "true"
-    );
+        elements.gamePlayer.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+    }
 
     document.body.classList.remove(
         "player-open"
     );
 
-    elements.gameFrame.src =
-        "about:blank";
+    if (elements.gameFrame) {
+        elements.gameFrame.src =
+            "about:blank";
+    }
 
     currentGame = null;
 
@@ -705,7 +744,10 @@ function closeGame(
 ========================================================= */
 
 function reloadGame() {
-    if (!currentGame) {
+    if (
+        !currentGame ||
+        !elements.gameFrame
+    ) {
         return;
     }
 
@@ -719,15 +761,14 @@ function reloadGame() {
 
 async function fullscreenGame() {
     try {
-        if (
-            document.fullscreenElement
-        ) {
+        if (document.fullscreenElement) {
             await document.exitFullscreen();
 
             return;
         }
 
         if (
+            elements.gameFrame &&
             elements.gameFrame.requestFullscreen
         ) {
             await elements.gameFrame.requestFullscreen();
@@ -736,6 +777,7 @@ async function fullscreenGame() {
         }
 
         if (
+            elements.gamePlayer &&
             elements.gamePlayer.requestFullscreen
         ) {
             await elements.gamePlayer.requestFullscreen();
@@ -764,9 +806,7 @@ function openRandomGame() {
             games.length
         );
 
-    openGame(
-        games[index]
-    );
+    openGame(games[index]);
 }
 
 /* =========================================================
@@ -799,10 +839,12 @@ function updateGameCount() {
 ========================================================= */
 
 function showLoading(show) {
-    if (elements.loadingState) {
-        elements.loadingState.hidden =
-            !show;
+    if (!elements.loadingState) {
+        return;
     }
+
+    elements.loadingState.hidden =
+        !show;
 }
 
 /* =========================================================
@@ -868,11 +910,11 @@ function setupEvents() {
         elements.clearSearchButton.addEventListener(
             "click",
             () => {
-                elements.gameSearch.value = "";
-
-                searchGames("");
-
-                elements.gameSearch.focus();
+                if (elements.gameSearch) {
+                    elements.gameSearch.value = "";
+                    searchGames("");
+                    elements.gameSearch.focus();
+                }
             }
         );
     }
@@ -938,39 +980,37 @@ function setupEvents() {
     }
 
     document
-        .querySelectorAll(
-            ".category-button"
-        )
-        .forEach(
-            button => {
-                button.addEventListener(
-                    "click",
-                    () => {
-                        document
-                            .querySelectorAll(
-                                ".category-button"
-                            )
-                            .forEach(
-                                other =>
-                                    other.classList.remove(
-                                        "active"
-                                    )
-                            );
-
-                        button.classList.add(
-                            "active"
+        .querySelectorAll(".category-button")
+        .forEach(button => {
+            button.addEventListener(
+                "click",
+                () => {
+                    document
+                        .querySelectorAll(
+                            ".category-button"
+                        )
+                        .forEach(
+                            other =>
+                                other.classList.remove(
+                                    "active"
+                                )
                         );
 
-                        currentCategory =
-                            button.dataset.category;
+                    button.classList.add(
+                        "active"
+                    );
 
-                        searchGames(
-                            elements.gameSearch.value
-                        );
-                    }
-                );
-            }
-        );
+                    currentCategory =
+                        button.dataset.category;
+
+                    searchGames(
+                        elements.gameSearch
+                            ? elements.gameSearch.value
+                            : ""
+                    );
+                }
+            );
+        });
 
     document.addEventListener(
         "keydown",
@@ -989,6 +1029,7 @@ function setupEvents() {
 
             if (
                 event.key === "/" &&
+                document.activeElement &&
                 document.activeElement.tagName !== "INPUT" &&
                 document.activeElement.tagName !== "TEXTAREA"
             ) {
