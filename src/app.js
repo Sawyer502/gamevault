@@ -35,11 +35,11 @@ document.addEventListener(
 );
 
 async function initialize() {
-    setupEvents();
-
     loadTheme();
 
     await loadGames();
+
+    setupEvents();
 
     openGameFromHash();
 }
@@ -113,9 +113,6 @@ function normalizeGame(game) {
         game.title ||
         prettifyName(id);
 
-    /*
-     * Convert an image value into a usable URL.
-     */
     function normalizeImage(image) {
         if (!image) {
             return null;
@@ -128,9 +125,6 @@ function normalizeGame(game) {
             return null;
         }
 
-        /*
-         * External image URL.
-         */
         if (
             value.startsWith("http://") ||
             value.startsWith("https://") ||
@@ -140,23 +134,14 @@ function normalizeGame(game) {
             return value;
         }
 
-        /*
-         * Existing local image.
-         */
         return value.startsWith("/")
             ? value
             : `../${value}`;
     }
 
-    /*
-     * Main image.
-     */
     const image =
         normalizeImage(game.image);
 
-    /*
-     * Hover images.
-     */
     const hoverImages =
         Array.isArray(game.hoverImages)
             ? game.hoverImages
@@ -315,22 +300,17 @@ function createGameCard(game, index) {
         </div>
     `;
 
-    /*
-     * Open game when the card is clicked.
-     */
     card.addEventListener(
         "click",
         () => openGame(game)
     );
 
     /*
-     * Start the image slideshow.
+     * Set up slideshow after the images
+     * have been inserted into the card.
      */
     setupGameImageSlideshow(card);
 
-    /*
-     * Keyboard support.
-     */
     card.addEventListener(
         "keydown",
         event => {
@@ -360,9 +340,6 @@ function createGameImage(game) {
             : [])
     ].filter(Boolean);
 
-    /*
-     * No images.
-     */
     if (!images.length) {
         return `
             <div class="game-placeholder">
@@ -371,12 +348,6 @@ function createGameImage(game) {
         `;
     }
 
-    /*
-     * Create all images.
-     *
-     * The first image is active.
-     * CSS handles the fading between images.
-     */
     return images
         .map(
             (image, index) => `
@@ -398,7 +369,6 @@ function createGameImage(game) {
                             : "lazy"
                     }"
                     data-image-index="${index}"
-                    onerror="this.remove()"
                 >
             `
         )
@@ -422,10 +392,6 @@ function setupGameImageSlideshow(card) {
             imageContainer.querySelectorAll("img")
         );
 
-    /*
-     * If there is only one image,
-     * there is nothing to alternate.
-     */
     if (images.length <= 1) {
         return;
     }
@@ -447,23 +413,14 @@ function setupGameImageSlideshow(card) {
     }
 
     function startSlideshow() {
-        /*
-         * Prevent multiple timers.
-         */
-        if (slideshowTimer) {
+        if (slideshowTimer !== null) {
             return;
         }
 
-        /*
-         * Start with the main image.
-         */
         showImage(0);
 
-        /*
-         * Change images every 2.2 seconds.
-         */
         slideshowTimer =
-            setInterval(
+            window.setInterval(
                 () => {
                     const nextIndex =
                         (
@@ -480,34 +437,22 @@ function setupGameImageSlideshow(card) {
     }
 
     function stopSlideshow() {
-        /*
-         * Stop the timer.
-         */
-        if (slideshowTimer) {
-            clearInterval(
+        if (slideshowTimer !== null) {
+            window.clearInterval(
                 slideshowTimer
             );
 
             slideshowTimer = null;
         }
 
-        /*
-         * Return to the main image.
-         */
         showImage(0);
     }
 
-    /*
-     * Start when hovering over the card.
-     */
     card.addEventListener(
         "mouseenter",
         startSlideshow
     );
 
-    /*
-     * Stop when leaving the card.
-     */
     card.addEventListener(
         "mouseleave",
         stopSlideshow
@@ -829,20 +774,24 @@ function openRandomGame() {
 ========================================================= */
 
 function updateGameCounts() {
-    elements.heroGameCount.textContent =
-        games.length;
+    if (elements.heroGameCount) {
+        elements.heroGameCount.textContent =
+            games.length;
+    }
 }
 
 function updateGameCount() {
     const amount =
         filteredGames.length;
 
-    elements.gameCount.textContent =
-        `${amount} ${
-            amount === 1
-                ? "game"
-                : "games"
-        }`;
+    if (elements.gameCount) {
+        elements.gameCount.textContent =
+            `${amount} ${
+                amount === 1
+                    ? "game"
+                    : "games"
+            }`;
+    }
 }
 
 /* =========================================================
@@ -850,8 +799,10 @@ function updateGameCount() {
 ========================================================= */
 
 function showLoading(show) {
-    elements.loadingState.hidden =
-        !show;
+    if (elements.loadingState) {
+        elements.loadingState.hidden =
+            !show;
+    }
 }
 
 /* =========================================================
@@ -869,8 +820,10 @@ function loadTheme() {
             "light"
         );
 
-        elements.themeButton.textContent =
-            "☾";
+        if (elements.themeButton) {
+            elements.themeButton.textContent =
+                "☾";
+        }
     }
 }
 
@@ -887,10 +840,12 @@ function toggleTheme() {
             : "dark"
     );
 
-    elements.themeButton.textContent =
-        light
-            ? "☾"
-            : "☼";
+    if (elements.themeButton) {
+        elements.themeButton.textContent =
+            light
+                ? "☾"
+                : "☼";
+    }
 }
 
 /* =========================================================
@@ -898,66 +853,89 @@ function toggleTheme() {
 ========================================================= */
 
 function setupEvents() {
-    elements.gameSearch.addEventListener(
-        "input",
-        event => {
-            searchGames(
-                event.target.value
-            );
-        }
-    );
+    if (elements.gameSearch) {
+        elements.gameSearch.addEventListener(
+            "input",
+            event => {
+                searchGames(
+                    event.target.value
+                );
+            }
+        );
+    }
 
-    elements.clearSearchButton.addEventListener(
-        "click",
-        () => {
-            elements.gameSearch.value = "";
+    if (elements.clearSearchButton) {
+        elements.clearSearchButton.addEventListener(
+            "click",
+            () => {
+                elements.gameSearch.value = "";
 
-            searchGames("");
+                searchGames("");
 
-            elements.gameSearch.focus();
-        }
-    );
+                elements.gameSearch.focus();
+            }
+        );
+    }
 
-    elements.browseButton.addEventListener(
-        "click",
-        () => {
-            document
-                .getElementById("games")
-                .scrollIntoView({
-                    behavior: "smooth"
-                });
-        }
-    );
+    if (elements.browseButton) {
+        elements.browseButton.addEventListener(
+            "click",
+            () => {
+                const gamesSection =
+                    document.getElementById(
+                        "games"
+                    );
 
-    elements.luckyButton.addEventListener(
-        "click",
-        openRandomGame
-    );
+                if (gamesSection) {
+                    gamesSection.scrollIntoView({
+                        behavior: "smooth"
+                    });
+                }
+            }
+        );
+    }
 
-    elements.randomGameButton.addEventListener(
-        "click",
-        openRandomGame
-    );
+    if (elements.luckyButton) {
+        elements.luckyButton.addEventListener(
+            "click",
+            openRandomGame
+        );
+    }
 
-    elements.closeGameButton.addEventListener(
-        "click",
-        () => closeGame()
-    );
+    if (elements.randomGameButton) {
+        elements.randomGameButton.addEventListener(
+            "click",
+            openRandomGame
+        );
+    }
 
-    elements.reloadGameButton.addEventListener(
-        "click",
-        reloadGame
-    );
+    if (elements.closeGameButton) {
+        elements.closeGameButton.addEventListener(
+            "click",
+            () => closeGame()
+        );
+    }
 
-    elements.fullscreenButton.addEventListener(
-        "click",
-        fullscreenGame
-    );
+    if (elements.reloadGameButton) {
+        elements.reloadGameButton.addEventListener(
+            "click",
+            reloadGame
+        );
+    }
 
-    elements.themeButton.addEventListener(
-        "click",
-        toggleTheme
-    );
+    if (elements.fullscreenButton) {
+        elements.fullscreenButton.addEventListener(
+            "click",
+            fullscreenGame
+        );
+    }
+
+    if (elements.themeButton) {
+        elements.themeButton.addEventListener(
+            "click",
+            toggleTheme
+        );
+    }
 
     document
         .querySelectorAll(
@@ -999,6 +977,7 @@ function setupEvents() {
         event => {
             if (
                 event.key === "Escape" &&
+                elements.gamePlayer &&
                 elements.gamePlayer.classList.contains(
                     "open"
                 )
@@ -1015,7 +994,9 @@ function setupEvents() {
             ) {
                 event.preventDefault();
 
-                elements.gameSearch.focus();
+                if (elements.gameSearch) {
+                    elements.gameSearch.focus();
+                }
             }
         }
     );
@@ -1024,6 +1005,7 @@ function setupEvents() {
         "popstate",
         () => {
             if (
+                elements.gamePlayer &&
                 elements.gamePlayer.classList.contains(
                     "open"
                 )
