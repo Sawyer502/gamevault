@@ -1,8 +1,8 @@
+```javascript
 let games = [];
 let filteredGames = [];
 let currentGame = null;
 let currentCategory = "all";
-
 
 const elements = {
     gamesGrid: document.getElementById("gamesGrid"),
@@ -29,15 +29,12 @@ const elements = {
     themeButton: document.getElementById("themeButton")
 };
 
-
 document.addEventListener(
     "DOMContentLoaded",
     initialize
 );
 
-
 async function initialize() {
-
     setupEvents();
 
     loadTheme();
@@ -46,7 +43,6 @@ async function initialize() {
 
     openGameFromHash();
 }
-
 
 /* =========================================================
    GAME LOADING
@@ -107,12 +103,12 @@ async function loadGames() {
     }
 }
 
-
 /* =========================================================
    NORMALIZE GAME
 ========================================================= */
 
 function normalizeGame(game) {
+
     const id = String(
         game.id ||
         game.title ||
@@ -123,26 +119,19 @@ function normalizeGame(game) {
         game.title ||
         prettifyName(id);
 
-    /*
-     * Convert an image value into a usable URL.
-     *
-     * External URLs are kept exactly as provided.
-     * Existing local image paths still work.
-     */
     function normalizeImage(image) {
+
         if (!image) {
             return null;
         }
 
-        const value = String(image).trim();
+        const value =
+            String(image).trim();
 
         if (!value) {
             return null;
         }
 
-        /*
-         * External image URL
-         */
         if (
             value.startsWith("http://") ||
             value.startsWith("https://") ||
@@ -152,25 +141,14 @@ function normalizeGame(game) {
             return value;
         }
 
-        /*
-         * Existing local image.
-         */
         return value.startsWith("/")
             ? value
             : `../${value}`;
     }
 
-    /*
-     * Main image/logo.
-     */
     const image =
         normalizeImage(game.image);
 
-    /*
-     * Any number of hover images.
-     *
-     * 0, 1, 2, 4, 10, etc. are all supported.
-     */
     const hoverImages =
         Array.isArray(game.hoverImages)
             ? game.hoverImages
@@ -179,6 +157,7 @@ function normalizeGame(game) {
             : [];
 
     return {
+
         ...game,
 
         id,
@@ -205,7 +184,6 @@ function normalizeGame(game) {
             null
     };
 }
-
 
 /* =========================================================
    NAME FORMATTING
@@ -238,7 +216,6 @@ function prettifyName(name) {
         );
 }
 
-
 /* =========================================================
    RENDER
 ========================================================= */
@@ -264,7 +241,6 @@ function renderGames() {
     elements.gamesGrid.style.display =
         "grid";
 
-
     filteredGames.forEach(
         (game, index) => {
 
@@ -277,13 +253,18 @@ function renderGames() {
             elements.gamesGrid.appendChild(
                 card
             );
+
+            /*
+             * IMPORTANT:
+             * Start the slideshow system
+             * for this specific card.
+             */
+            setupGameImageSlideshow(card);
         }
     );
 
-
     updateGameCount();
 }
-
 
 /* =========================================================
    GAME CARD
@@ -294,13 +275,13 @@ function createGameCard(game, index) {
     const card =
         document.createElement("article");
 
-    card.className = "game-card";
+    card.className =
+        "game-card";
 
     card.tabIndex = 0;
 
     card.style.animationDelay =
         `${Math.min(index * 35, 350)}ms`;
-
 
     card.innerHTML = `
 
@@ -320,7 +301,9 @@ function createGameCard(game, index) {
                 </div>
 
                 <div class="game-meta">
-                    ${escapeHTML(getGameMeta(game))}
+                    ${escapeHTML(
+                        getGameMeta(game)
+                    )}
                 </div>
 
             </div>
@@ -336,12 +319,10 @@ function createGameCard(game, index) {
         </div>
     `;
 
-
     card.addEventListener(
         "click",
         () => openGame(game)
     );
-
 
     card.addEventListener(
         "keydown",
@@ -359,16 +340,15 @@ function createGameCard(game, index) {
         }
     );
 
-
     return card;
 }
 
-
 /* =========================================================
-   IMAGE
+   GAME IMAGES
 ========================================================= */
 
 function createGameImage(game) {
+
     const images = [
         game.image,
         ...(Array.isArray(game.hoverImages)
@@ -376,7 +356,11 @@ function createGameImage(game) {
             : [])
     ].filter(Boolean);
 
+    /*
+     * No images.
+     */
     if (!images.length) {
+
         return `
             <div class="game-placeholder">
                 ✦
@@ -384,42 +368,34 @@ function createGameImage(game) {
         `;
     }
 
-    return `
-        <img
-            src="${escapeAttribute(images[0])}"
-            alt="${escapeAttribute(game.title)}"
-            loading="eager"
-            data-slideshow-images="${escapeAttribute(
-                JSON.stringify(images)
-            )}"
-            data-image-index="0"
-        >
-    `;
-}
-
     /*
-     * Every image is placed in the same
-     * position. CSS handles the fading.
+     * Put every image into the card.
      *
-     * The first image is the main logo/image.
+     * CSS keeps them stacked in the
+     * exact same position.
      */
     return images
-        .map((image, index) => `
-            <img
-                class="${index === 0 ? "active" : ""}"
-                src="${escapeAttribute(image)}"
-                alt="${escapeAttribute(game.title)}"
-                loading="${index === 0 ? "eager" : "lazy"}"
-                data-image-index="${index}"
-                onerror="this.remove()"
-            >
-        `)
+        .map(
+            (image, index) => `
+                <img
+                    class="${index === 0 ? "active" : ""}"
+                    src="${escapeAttribute(image)}"
+                    alt="${escapeAttribute(game.title)}"
+                    loading="${index === 0 ? "eager" : "lazy"}"
+                    data-image-index="${index}"
+                    onerror="this.remove()"
+                >
+            `
+        )
         .join("");
 }
 
-
+/* =========================================================
+   IMAGE SLIDESHOW
+========================================================= */
 
 function setupGameImageSlideshow(card) {
+
     const imageContainer =
         card.querySelector(".game-image");
 
@@ -427,127 +403,75 @@ function setupGameImageSlideshow(card) {
         return;
     }
 
-    const image =
-        imageContainer.querySelector(
-            "img[data-slideshow-images]"
+    const images =
+        Array.from(
+            imageContainer.querySelectorAll("img")
         );
 
-    if (!image) {
-        return;
-    }
-
-    let images;
-
-    try {
-        images = JSON.parse(
-            image.dataset.slideshowImages
-        );
-    } catch (error) {
-        console.warn(
-            "Could not read slideshow images:",
-            error
-        );
-
-        return;
-    }
-
-    if (
-        !Array.isArray(images) ||
-        images.length <= 1
-    ) {
+    /*
+     * No slideshow needed if there
+     * is only one image.
+     */
+    if (images.length <= 1) {
         return;
     }
 
     let currentIndex = 0;
+
     let slideshowTimer = null;
 
-    function showNextImage() {
-        currentIndex =
-            (currentIndex + 1) %
-            images.length;
+    function showImage(index) {
 
-        image.style.opacity = "0";
+        images.forEach(
+            (image, imageIndex) => {
 
-        window.setTimeout(() => {
-            image.src =
-                images[currentIndex];
+                image.classList.toggle(
+                    "active",
+                    imageIndex === index
+                );
 
-            image.dataset.imageIndex =
-                currentIndex;
+            }
+        );
 
-            image.style.opacity = "1";
-        }, 250);
+        currentIndex = index;
     }
 
     function startSlideshow() {
+
+        /*
+         * Prevent duplicate timers.
+         */
         if (slideshowTimer !== null) {
             return;
         }
 
         /*
-         * Start changing images after
-         * the user hovers over the card.
+         * Always begin with the main image.
+         */
+        showImage(0);
+
+        /*
+         * Change images every 2.2 seconds.
          */
         slideshowTimer =
             window.setInterval(
-                showNextImage,
+                () => {
+
+                    const nextIndex =
+                        (currentIndex + 1) %
+                        images.length;
+
+                    showImage(nextIndex);
+
+                },
                 2200
             );
     }
 
     function stopSlideshow() {
+
         if (slideshowTimer !== null) {
-            window.clearInterval(
-                slideshowTimer
-            );
 
-            slideshowTimer = null;
-        }
-
-        currentIndex = 0;
-
-        image.style.opacity = "1";
-
-        image.src = images[0];
-
-        image.dataset.imageIndex = "0";
-    }
-
-    card.addEventListener(
-        "mouseenter",
-        startSlideshow
-    );
-
-    card.addEventListener(
-        "mouseleave",
-        stopSlideshow
-    );
-}
-
-    function startSlideshow() {
-        if (slideshowTimer !== null) {
-            return;
-        }
-
-        /*
-         * Start with the main image.
-         */
-        showImage(0);
-
-        /*
-         * Change image every 2.2 seconds.
-         */
-        slideshowTimer = window.setInterval(() => {
-            const nextIndex =
-                (currentIndex + 1) %
-                images.length;
-
-            showImage(nextIndex);
-        }, 2200);
-    }
-
-    function stopSlideshow() {
-        if (slideshowTimer !== null) {
             window.clearInterval(
                 slideshowTimer
             );
@@ -562,7 +486,7 @@ function setupGameImageSlideshow(card) {
     }
 
     /*
-     * Start when hovering over the game card.
+     * Start slideshow when hovering.
      */
     card.addEventListener(
         "mouseenter",
@@ -570,94 +494,13 @@ function setupGameImageSlideshow(card) {
     );
 
     /*
-     * Stop when leaving the card.
+     * Stop slideshow when leaving.
      */
     card.addEventListener(
         "mouseleave",
         stopSlideshow
     );
 }
-
-
-
-    const images =
-        Array.from(
-            imageContainer.querySelectorAll("img")
-        );
-
-    /*
-     * If there is only the main image,
-     * there is nothing to animate.
-     */
-    if (images.length <= 1) {
-        return;
-    }
-
-    let currentIndex = 0;
-    let slideshowTimer = null;
-
-    function showImage(index) {
-        images.forEach((image, imageIndex) => {
-            image.classList.toggle(
-                "active",
-                imageIndex === index
-            );
-        });
-
-        currentIndex = index;
-    }
-
-    function startSlideshow() {
-        /*
-         * Prevent multiple timers from
-         * being created.
-         */
-        if (slideshowTimer) {
-            return;
-        }
-
-        /*
-         * Always begin with the main image.
-         */
-        showImage(0);
-
-        /*
-         * Move to the next image every
-         * 2.2 seconds.
-         */
-        slideshowTimer = setInterval(() => {
-            const nextIndex =
-                (currentIndex + 1) %
-                images.length;
-
-            showImage(nextIndex);
-        }, 2200);
-    }
-
-    function stopSlideshow() {
-        if (slideshowTimer) {
-            clearInterval(slideshowTimer);
-            slideshowTimer = null;
-        }
-
-        /*
-         * Always return to the main image
-         * when the mouse leaves.
-         */
-        showImage(0);
-    }
-
-    card.addEventListener(
-        "mouseenter",
-        startSlideshow
-    );
-
-    card.addEventListener(
-        "mouseleave",
-        stopSlideshow
-    );
-}
-
 
 /* =========================================================
    META
@@ -673,6 +516,7 @@ function getGameMeta(game) {
         game.category &&
         game.category !== "all"
     ) {
+
         return prettifyName(
             game.category
         );
@@ -680,7 +524,6 @@ function getGameMeta(game) {
 
     return "Play now";
 }
-
 
 /* =========================================================
    SEARCH
@@ -692,7 +535,6 @@ function searchGames(query) {
         query
             .trim()
             .toLowerCase();
-
 
     filteredGames =
         games.filter(game => {
@@ -706,10 +548,8 @@ function searchGames(query) {
                     .toLowerCase()
                     .includes(normalized);
 
-
             const matchesCategory =
                 matchesCurrentCategory(game);
-
 
             return (
                 matchesSearch &&
@@ -717,10 +557,8 @@ function searchGames(query) {
             );
         });
 
-
     renderGames();
 }
-
 
 /* =========================================================
    CATEGORY
@@ -734,15 +572,14 @@ function matchesCurrentCategory(game) {
         return true;
     }
 
-
     if (
         currentCategory === "featured"
     ) {
+
         return Boolean(
             game.featured
         );
     }
-
 
     if (
         currentCategory === "new"
@@ -765,13 +602,11 @@ function matchesCurrentCategory(game) {
         );
     }
 
-
     return (
         game.category ===
         currentCategory
     );
 }
-
 
 /* =========================================================
    OPEN GAME
@@ -783,47 +618,40 @@ function openGame(game) {
         return;
     }
 
-
     currentGame = game;
-
 
     elements.playerTitle.textContent =
         game.title;
 
-
     elements.playerGameIcon.textContent =
         getInitial(game.title);
-
 
     elements.gameFrame.src =
         game.file;
 
-
     elements.gamePlayer.classList.add(
         "open"
     );
-
 
     elements.gamePlayer.setAttribute(
         "aria-hidden",
         "false"
     );
 
-
     document.body.classList.add(
         "player-open"
     );
-
 
     history.pushState(
         {
             game: game.id
         },
         "",
-        `#play=${encodeURIComponent(game.id)}`
+        `#play=${encodeURIComponent(
+            game.id
+        )}`
     );
 }
-
 
 /* =========================================================
    OPEN FROM URL
@@ -834,19 +662,16 @@ function openGameFromHash() {
     const hash =
         window.location.hash;
 
-
     if (
         !hash.startsWith("#play=")
     ) {
         return;
     }
 
-
     const id =
         decodeURIComponent(
             hash.substring(6)
         );
-
 
     const game =
         games.find(
@@ -854,12 +679,10 @@ function openGameFromHash() {
                 item.id === id
         );
 
-
     if (game) {
         openGameWithoutHistory(game);
     }
 }
-
 
 function openGameWithoutHistory(game) {
 
@@ -888,7 +711,6 @@ function openGameWithoutHistory(game) {
     );
 }
 
-
 /* =========================================================
    CLOSE
 ========================================================= */
@@ -901,24 +723,19 @@ function closeGame(
         "open"
     );
 
-
     elements.gamePlayer.setAttribute(
         "aria-hidden",
         "true"
     );
 
-
     document.body.classList.remove(
         "player-open"
     );
 
-
     elements.gameFrame.src =
         "about:blank";
 
-
     currentGame = null;
-
 
     if (
         updateHistory &&
@@ -934,7 +751,6 @@ function closeGame(
     }
 }
 
-
 /* =========================================================
    RELOAD
 ========================================================= */
@@ -948,7 +764,6 @@ function reloadGame() {
     elements.gameFrame.src =
         currentGame.file;
 }
-
 
 /* =========================================================
    FULLSCREEN
@@ -967,7 +782,6 @@ async function fullscreenGame() {
             return;
         }
 
-
         if (
             elements.gameFrame.requestFullscreen
         ) {
@@ -976,7 +790,6 @@ async function fullscreenGame() {
 
             return;
         }
-
 
         if (
             elements.gamePlayer.requestFullscreen
@@ -994,7 +807,6 @@ async function fullscreenGame() {
     }
 }
 
-
 /* =========================================================
    RANDOM GAME
 ========================================================= */
@@ -1005,19 +817,16 @@ function openRandomGame() {
         return;
     }
 
-
     const index =
         Math.floor(
             Math.random() *
             games.length
         );
 
-
     openGame(
         games[index]
     );
 }
-
 
 /* =========================================================
    COUNTERS
@@ -1029,12 +838,10 @@ function updateGameCounts() {
         games.length;
 }
 
-
 function updateGameCount() {
 
     const amount =
         filteredGames.length;
-
 
     elements.gameCount.textContent =
         `${amount} ${
@@ -1043,7 +850,6 @@ function updateGameCount() {
                 : "games"
         }`;
 }
-
 
 /* =========================================================
    LOADING
@@ -1054,7 +860,6 @@ function showLoading(show) {
     elements.loadingState.hidden =
         !show;
 }
-
 
 /* =========================================================
    THEME
@@ -1067,7 +872,6 @@ function loadTheme() {
             "gamevault-theme"
         );
 
-
     if (theme === "light") {
 
         document.body.classList.add(
@@ -1076,9 +880,13 @@ function loadTheme() {
 
         elements.themeButton.textContent =
             "☾";
+
+    } else {
+
+        elements.themeButton.textContent =
+            "☼";
     }
 }
-
 
 function toggleTheme() {
 
@@ -1087,7 +895,6 @@ function toggleTheme() {
             "light"
         );
 
-
     localStorage.setItem(
         "gamevault-theme",
         light
@@ -1095,13 +902,11 @@ function toggleTheme() {
             : "dark"
     );
 
-
     elements.themeButton.textContent =
         light
             ? "☾"
             : "☼";
 }
-
 
 /* =========================================================
    EVENTS
@@ -1119,7 +924,6 @@ function setupEvents() {
         }
     );
 
-
     elements.clearSearchButton.addEventListener(
         "click",
         () => {
@@ -1131,7 +935,6 @@ function setupEvents() {
             elements.gameSearch.focus();
         }
     );
-
 
     elements.browseButton.addEventListener(
         "click",
@@ -1145,42 +948,35 @@ function setupEvents() {
         }
     );
 
-
     elements.luckyButton.addEventListener(
         "click",
         openRandomGame
     );
-
 
     elements.randomGameButton.addEventListener(
         "click",
         openRandomGame
     );
 
-
     elements.closeGameButton.addEventListener(
         "click",
         () => closeGame()
     );
-
 
     elements.reloadGameButton.addEventListener(
         "click",
         reloadGame
     );
 
-
     elements.fullscreenButton.addEventListener(
         "click",
         fullscreenGame
     );
 
-
     elements.themeButton.addEventListener(
         "click",
         toggleTheme
     );
-
 
     document
         .querySelectorAll(
@@ -1203,15 +999,12 @@ function setupEvents() {
                                 )
                         );
 
-
                     button.classList.add(
                         "active"
                     );
 
-
                     currentCategory =
                         button.dataset.category;
-
 
                     searchGames(
                         elements.gameSearch.value
@@ -1219,7 +1012,6 @@ function setupEvents() {
                 }
             );
         });
-
 
     document.addEventListener(
         "keydown",
@@ -1237,7 +1029,6 @@ function setupEvents() {
                 return;
             }
 
-
             if (
                 event.key === "/" &&
                 document.activeElement.tagName !== "INPUT" &&
@@ -1250,7 +1041,6 @@ function setupEvents() {
             }
         }
     );
-
 
     window.addEventListener(
         "popstate",
@@ -1268,7 +1058,6 @@ function setupEvents() {
     );
 }
 
-
 /* =========================================================
    HELPERS
 ========================================================= */
@@ -1283,7 +1072,6 @@ function getInitial(text) {
         "G"
     );
 }
-
 
 function escapeHTML(value) {
 
@@ -1302,8 +1090,8 @@ function escapeHTML(value) {
         );
 }
 
-
 function escapeAttribute(value) {
 
     return escapeHTML(value);
 }
+```
