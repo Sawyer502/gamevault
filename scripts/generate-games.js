@@ -1,3 +1,4 @@
+```javascript
 const fs = require("fs");
 const path = require("path");
 
@@ -12,16 +13,15 @@ const GAME_METADATA = path.join(
 );
 
 
-/*
- * Make sure the directories/files exist.
- */
+/* =========================================================
+   SETUP
+========================================================= */
 
 if (!fs.existsSync(GAMES_DIR)) {
     fs.mkdirSync(GAMES_DIR, {
         recursive: true
     });
 }
-
 
 if (!fs.existsSync(GAME_METADATA)) {
     fs.writeFileSync(
@@ -32,19 +32,19 @@ if (!fs.existsSync(GAME_METADATA)) {
 }
 
 
-/*
- * Load metadata created by import-games.js.
- */
+/* =========================================================
+   LOAD METADATA
+========================================================= */
 
 let metadata = {};
 
 try {
-
-    const content =
-        fs.readFileSync(
+    const content = fs
+        .readFileSync(
             GAME_METADATA,
             "utf8"
-        ).trim();
+        )
+        .trim();
 
     if (content) {
         metadata = JSON.parse(content);
@@ -53,20 +53,102 @@ try {
 } catch (error) {
 
     console.error(
-        "ERROR: game-metadata.json is invalid."
+        "\nERROR: game-metadata.json is invalid.\n"
     );
+
+    console.error(error.message);
 
     process.exit(1);
 }
 
 
+/* =========================================================
+   CLEAN IMAGE URL
+========================================================= */
+
 /*
- * Turn a filename into a readable title.
+ * Accepts:
+ *
+ * https://example.com/image.png
+ *
+ * OR Markdown:
+ *
+ * [https://example.com/image.png](https://example.com/image.png)
+ *
+ * and returns:
+ *
+ * https://example.com/image.png
  */
+
+function cleanImageUrl(value) {
+
+    if (!value) {
+        return "";
+    }
+
+    let url =
+        String(value).trim();
+
+    if (!url) {
+        return "";
+    }
+
+
+    /*
+     * Remove Markdown image/link
+     * formatting.
+     */
+
+    const markdownMatch =
+        url.match(
+            /^\[.*?\]\((.*?)\)$/
+        );
+
+    if (markdownMatch) {
+        url =
+            markdownMatch[1].trim();
+    }
+
+
+    /*
+     * Remove accidental whitespace.
+     */
+
+    url =
+        url.replace(
+            /\s+/g,
+            ""
+        );
+
+
+    return url;
+}
+
+
+/* =========================================================
+   CLEAN HOVER IMAGES
+========================================================= */
+
+function cleanHoverImages(value) {
+
+    if (!Array.isArray(value)) {
+        return [];
+    }
+
+    return value
+        .map(cleanImageUrl)
+        .filter(Boolean);
+}
+
+
+/* =========================================================
+   PRETTIFY NAME
+========================================================= */
 
 function prettifyName(filename) {
 
     return filename
+
         .replace(
             /\.html$/i,
             ""
@@ -91,18 +173,20 @@ function prettifyName(filename) {
 
         .replace(
             /\b\w/g,
-            char => char.toUpperCase()
+            char =>
+                char.toUpperCase()
         );
 }
 
 
-/*
- * Create a safe ID.
- */
+/* =========================================================
+   CREATE ID
+========================================================= */
 
 function createId(filename) {
 
     return filename
+
         .replace(
             /\.html$/i,
             ""
@@ -122,17 +206,20 @@ function createId(filename) {
 }
 
 
-/*
- * Find every HTML game.
- */
+/* =========================================================
+   FIND GAMES
+========================================================= */
 
 const files =
     fs.readdirSync(GAMES_DIR)
-        .filter(file =>
-            file
-                .toLowerCase()
-                .endsWith(".html")
+
+        .filter(
+            file =>
+                file
+                    .toLowerCase()
+                    .endsWith(".html")
         )
+
         .sort(
             (a, b) =>
                 a.localeCompare(
@@ -146,70 +233,84 @@ const files =
         );
 
 
-/*
- * Generate games.json.
- */
+/* =========================================================
+   GENERATE GAMES
+========================================================= */
 
-const games = files.map(file => {
+const games =
+    files.map(file => {
 
-    const id =
-        createId(file);
-
-
-    /*
-     * Find metadata supplied by
-     * import-games.js.
-     */
-    const info =
-        metadata[id] || {};
+        const id =
+            createId(file);
 
 
-    return {
+        /*
+         * Find metadata for this game.
+         */
 
-        id,
+        const info =
+            metadata[id] || {};
 
-        title:
+
+        /*
+         * If metadata is missing,
+         * use sensible defaults.
+         */
+
+        const title =
             info.title ||
-            prettifyName(file),
+            prettifyName(file);
 
-        file:
-            `games/${file}`,
 
-        image:
-            info.image ||
-            "",
+        const image =
+            cleanImageUrl(
+                info.image
+            );
 
-        hoverImages:
-            Array.isArray(
+
+        const hoverImages =
+            cleanHoverImages(
                 info.hoverImages
-            )
-                ? info.hoverImages
-                : [],
+            );
 
-        category:
-            info.category ||
-            "all",
 
-        featured:
-            Boolean(
-                info.featured
-            ),
-
-        created:
+        const created =
             info.created ||
             new Date()
                 .toISOString()
-                .slice(0, 10)
-
-    };
-
-});
+                .slice(0, 10);
 
 
-/*
- * Write the automatically generated
- * games.json.
- */
+        return {
+
+            id,
+
+            title,
+
+            file:
+                `games/${file}`,
+
+            image,
+
+            hoverImages,
+
+            category:
+                info.category ||
+                "all",
+
+            featured:
+                Boolean(
+                    info.featured
+                ),
+
+            created
+        };
+    });
+
+
+/* =========================================================
+   WRITE GAMES.JSON
+========================================================= */
 
 fs.writeFileSync(
 
@@ -225,6 +326,40 @@ fs.writeFileSync(
 );
 
 
+/* =========================================================
+   REPORT
+========================================================= */
+
 console.log(
-    `✓ Generated games.json with ${games.length} game(s).`
+    `\n✓ Generated games.json with ${games.length} game(s).\n`
 );
+
+
+if (games.length > 0) {
+
+    console.log(
+        "Games found:"
+    );
+
+    games.forEach(
+        game => {
+
+            console.log(
+                `  • ${game.title} (${game.id})`
+            );
+        }
+    );
+
+    console.log("");
+
+} else {
+
+    console.log(
+        "⚠ No .html games were found in the games folder."
+    );
+
+    console.log(
+        `  Checked: ${GAMES_DIR}\n`
+    );
+}
+```
