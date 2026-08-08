@@ -343,6 +343,14 @@ function createGameCard(game, index) {
 );
 
 setupGameImageSlideshow(card);
+    const images =
+    Array.from(
+        imageContainer.querySelectorAll("img")
+    );
+
+console.log("SLIDESHOW IMAGES:", images.length);
+console.log("SLIDESHOW IMAGES:", images.length);
+
 
 card.addEventListener(
     "keydown",
