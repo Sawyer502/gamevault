@@ -3,13 +3,13 @@
     "id": "gladihoppers",
     "title": "Gladihoppers",
     "file": "/games/gladihoppers.html",
-    "image": "/images/gladihoppers/gladihoppers.webp",
+    "image": "images/gladihoppers/gladihoppers.webp",
     "hoverImages": [
-      "/images/gladihoppers/gladihoppers-1.webp",
-      "/images/gladihoppers/gladihoppers-2.webp",
-      "/images/gladihoppers/gladihoppers-3.webp",
-      "/images/gladihoppers/gladihoppers-4.webp",
-      "/images/gladihoppers/gladihoppers-5.webp"
+      "images/gladihoppers/gladihoppers-1.webp",
+      "images/gladihoppers/gladihoppers-2.webp",
+      "images/gladihoppers/gladihoppers-3.webp",
+      "images/gladihoppers/gladihoppers-4.webp",
+      "images/gladihoppers/gladihoppers-5.webp"
     ],
     "category": "all",
     "featured": false,
@@ -19,12 +19,12 @@
     "id": "konkr-io",
     "title": "Konkr.io",
     "file": "/games/konkr%20io.html",
-    "image": "/images/Konkr IO/konkr.webp",
+    "image": "images/KonkrIO/konkr.webp",
     "hoverImages": [
-      "/images/Konkr IO/konkr-1.webp",
-      "/images/Konkr IO/konkr-2.webp",
-      "/images/Konkr IO/konkr-3.webp",
-      "/images/Konkr IO/konkr-4.webp"
+      "images/KonkrIO/konkr-1.webp",
+      "images/KonkrIO/konkr-2.webp",
+      "images/KonkrIO/konkr-3.webp",
+      "images/KonkrIO/konkr-4.webp"
     ],
     "category": "all",
     "featured": false,
@@ -34,8 +34,15 @@
     "id": "rocketgoal-io",
     "title": "Rocketgoal Io",
     "file": "/games/rocketgoal%20io.html",
-    "image": "",
-    "hoverImages": [],
+    "image": "images/rocketgoal-io/rocketgoal.webp",
+    "hoverImages": [
+      "images/rocketgoal-io/rocketgoal-1.webp",
+      "images/rocketgoal-io/rocketgoal-2.webp",
+      "images/rocketgoal-io/rocketgoal-3.webp",
+      "images/rocketgoal-io/rocketgoal-4.webp",
+      "images/rocketgoal-io/rocketgoal-5.webp",
+      "images/rocketgoal-io/rocketgoal-6.webp"
+    ],
     "category": "all",
     "featured": false,
     "created": "2026-08-09"

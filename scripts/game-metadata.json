@@ -13,7 +13,6 @@
     "featured": false,
     "created": "2026-08-08"
   },
-
   "gladihoppers": {
     "title": "Gladihoppers",
     "file": "games/gladihoppers.html",
@@ -24,6 +23,22 @@
       "images/gladihoppers/gladihoppers-3.webp",
       "images/gladihoppers/gladihoppers-4.webp",
       "images/gladihoppers/gladihoppers-5.webp"
+    ],
+    "category": "all",
+    "featured": false,
+    "created": "2026-08-09"
+  },
+  "rocketgoal-io": {
+    "title": "Rocketgoal Io",
+    "file": "games/rocketgoal io.html",
+    "image": "images/rocketgoal-io/rocketgoal.webp",
+    "hoverImages": [
+      "images/rocketgoal-io/rocketgoal-1.webp",
+      "images/rocketgoal-io/rocketgoal-2.webp",
+      "images/rocketgoal-io/rocketgoal-3.webp",
+      "images/rocketgoal-io/rocketgoal-4.webp",
+      "images/rocketgoal-io/rocketgoal-5.webp",
+      "images/rocketgoal-io/rocketgoal-6.webp"
     ],
     "category": "all",
     "featured": false,
