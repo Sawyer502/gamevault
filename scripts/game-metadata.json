@@ -43,5 +43,19 @@
     "category": "all",
     "featured": false,
     "created": "2026-08-09"
+  },
+  "retrobowlcollege": {
+    "title": "Retro Bowl College",
+    "file": "games/retrobowlcollege.html",
+    "image": "images/retrobowlcollege/retrobowlcollege.webp",
+    "hoverImages": [
+      "images/retrobowlcollege/retrobowlcollege-1.webp",
+      "images/retrobowlcollege/retrobowlcollege-2.webp",
+      "images/retrobowlcollege/retrobowlcollege-3.webp",
+      "images/retrobowlcollege/retrobowlcollege-4.webp"
+    ],
+    "category": "all",
+    "featured": false,
+    "created": "2026-08-09"
   }
 }
