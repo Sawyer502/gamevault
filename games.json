@@ -36,12 +36,12 @@
     "file": "/games/rocketgoal-io.html",
     "image": "images/rocketgoal-io/rocketgoal.webp",
     "hoverImages": [
-      "https://cdn3.appshunter.io/i/PurpleSource221/9c3d4a3b9ac912d8edc487af84302f44/locker.png/643x0w.webp",
-      "https://cdn3.appshunter.io/i/PurpleSource221/b2bcf7a08a3b1d6434ac53a9e9a436b1/1__U00283_U0029.png/643x0w.webp",
-      "https://cdn3.appshunter.io/i/PurpleSource211/bf179832048981e12e2298ddeee5068e/6__U00282_U0029.png/643x0w.webp",
-      "https://cdn3.appshunter.io/i/PurpleSource211/acb82a6de9563c97b8071b96be5032a1/5.png/643x0w.webp",
-      "https://cdn3.appshunter.io/i/PurpleSource211/0d088a5cfb206b5e7ea97482444af854/4.png/643x0w.webp",
-      "https://cdn3.appshunter.io/i/PurpleSource211/ecf4cd159bad322a563e209f7256e65b/2__U00283_U0029.png/643x0w.webp"
+      "images/rocketgoal-io/rocketgoal-1.webp",
+      "images/rocketgoal-io/rocketgoal-2.webp",
+      "images/rocketgoal-io/rocketgoal-3.webp",
+      "images/rocketgoal-io/rocketgoal-4.webp",
+      "images/rocketgoal-io/rocketgoal-5.webp",
+      "images/rocketgoal-io/rocketgoal-6.webp"
     ],
     "category": "all",
     "featured": false,
