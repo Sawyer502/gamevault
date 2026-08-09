@@ -2,27 +2,28 @@
   "konkr-io": {
     "title": "Konkr.io",
     "file": "games/konkr io.html",
-    "image": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9tol.webp",
+    "image": "images/Konkr IO/konkr.webp",
     "hoverImages": [
-      "https://images.igdb.com/igdb/image/upload/t_720p/scwucn.webp",
-      "https://images.igdb.com/igdb/image/upload/t_720p/scwuco.webp",
-      "https://images.igdb.com/igdb/image/upload/t_720p/scwucp.webp",
-      "https://images.igdb.com/igdb/image/upload/t_720p/scwucq.webp"
+      "images/Konkr IO/konkr-1.webp",
+      "images/Konkr IO/konkr-2.webp",
+      "images/Konkr IO/konkr-3.webp",
+      "images/Konkr IO/konkr-4.webp"
     ],
     "category": "all",
     "featured": false,
     "created": "2026-08-08"
   },
+
   "gladihoppers": {
     "title": "Gladihoppers",
     "file": "games/gladihoppers.html",
-    "image": "https://images.igdb.com/igdb/image/upload/t_cover_big/co86sp.webp",
+    "image": "images/gladihoppers/gladihoppers.webp",
     "hoverImages": [
-      "https://images.igdb.com/igdb/image/upload/t_720p/sce8cs.webp",
-      "https://images.igdb.com/igdb/image/upload/t_720p/sce8ct.webp",
-      "https://images.igdb.com/igdb/image/upload/t_720p/sce8cv.webp",
-      "https://images.igdb.com/igdb/image/upload/t_720p/sce8cy.webp",
-      "https://images.igdb.com/igdb/image/upload/t_720p/sce8d0.webp"
+      "images/gladihoppers/gladihoppers-1.webp",
+      "images/gladihoppers/gladihoppers-2.webp",
+      "images/gladihoppers/gladihoppers-3.webp",
+      "images/gladihoppers/gladihoppers-4.webp",
+      "images/gladihoppers/gladihoppers-5.webp"
     ],
     "category": "all",
     "featured": false,
