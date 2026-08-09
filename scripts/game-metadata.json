@@ -12,5 +12,20 @@
     "category": "all",
     "featured": false,
     "created": "2026-08-08"
+  },
+  "gladihoppers": {
+    "title": "Gladihoppers",
+    "file": "games/gladihoppers.html",
+    "image": "https://images.igdb.com/igdb/image/upload/t_cover_big/co86sp.webp",
+    "hoverImages": [
+      "https://images.igdb.com/igdb/image/upload/t_720p/sce8cs.webp",
+      "https://images.igdb.com/igdb/image/upload/t_720p/sce8ct.webp",
+      "https://images.igdb.com/igdb/image/upload/t_720p/sce8cv.webp",
+      "https://images.igdb.com/igdb/image/upload/t_720p/sce8cy.webp",
+      "https://images.igdb.com/igdb/image/upload/t_720p/sce8d0.webp"
+    ],
+    "category": "all",
+    "featured": false,
+    "created": "2026-08-09"
   }
 }
