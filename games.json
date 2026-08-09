@@ -18,14 +18,13 @@
   {
     "id": "konkr-io",
     "title": "Konkr.io",
-    "file": "/games/konkr%20io.html",
-    "image": "images/KonkrIO/konkr.webp",
+    "file": "/games/konkr-io.html",
+    "image": "images/konkr-io/konkr.webp",
     "hoverImages": [
-      "images/KonkrIO/konkr-1.webp",
-      "images/KonkrIO/konkr-2.webp",
-      "images/KonkrIO/konkr-3.webp",
-      "images/KonkrIO/konkr-4.webp"
-
+      "images/konkr-io/konkr-1.webp",
+      "images/konkr-io/konkr-2.webp",
+      "images/konkr-io/konkr-3.webp",
+      "images/konkr-io/konkr-4.webp"
     ],
     "category": "all",
     "featured": false,
@@ -34,7 +33,7 @@
   {
     "id": "rocketgoal-io",
     "title": "Rocketgoal Io",
-    "file": "/games/rocketgoal%20io.html",
+    "file": "/games/rocketgoal-io.html",
     "image": "images/rocketgoal-io/rocketgoal.webp",
     "hoverImages": [
       "images/rocketgoal-io/rocketgoal-1.webp",
