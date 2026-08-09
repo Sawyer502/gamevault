@@ -19,12 +19,12 @@
     "id": "konkr-io",
     "title": "Konkr.io",
     "file": "/games/konkr%20io.html",
-    "image": "/images/Konkr IO/konkr.webp",
+    "image": "/images/konkr-io/konkr.webp",
     "hoverImages": [
-      "/images/Konkr IO/konkr-1.webp",
-      "/images/Konkr IO/konkr-2.webp",
-      "/images/Konkr IO/konkr-3.webp",
-      "/images/Konkr IO/konkr-4.webp"
+      "/images/konkr-io/konkr-1.webp",
+      "/images/konkr-io/konkr-2.webp",
+      "/images/konkr-io/konkr-3.webp",
+      "/images/konkr-io/konkr-4.webp"
     ],
     "category": "all",
     "featured": false,
