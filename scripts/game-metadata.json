@@ -1,7 +1,7 @@
 {
   "konkr-io": {
     "title": "Konkr.io",
-    "file": "games/konkr io.html",
+    "file": "games/konkr-io.html",
     "image": "images/konkr-io/konkr.webp",
     "hoverImages": [
       "images/konkr-io/konkr-1.webp",
@@ -30,7 +30,7 @@
   },
   "rocketgoal-io": {
     "title": "Rocketgoal Io",
-    "file": "games/rocketgoal io.html",
+    "file": "games/rocketgoal-io.html",
     "image": "images/rocketgoal-io/rocketgoal.webp",
     "hoverImages": [
       "images/rocketgoal-io/rocketgoal-1.webp",
