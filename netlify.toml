@@ -6,3 +6,9 @@
   from = "/"
   to = "/src/index.html"
   status = 200
+
+[[headers]]
+  for = "/proxy/*"
+  [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "require-corp"
