@@ -4,7 +4,12 @@
   "private": true,
   "description": "GameVault gaming arcade",
   "scripts": {
-    "build": "node scripts/generate-games.js",
+    "build": "node scripts/generate-games.js && node scripts/build-proxy.js",
     "import-game": "node scripts/import-games.js"
+  },
+  "dependencies": {
+    "@titaniumnetwork-dev/ultraviolet": "3.2.10",
+    "@mercuryworkshop/bare-mux": "2.1.9",
+    "@mercuryworkshop/epoxy-transport": "3.0.1"
   }
 }
